@@ -9,4 +9,13 @@ public class EnumErrors {
             this.message = message;
         }
     }
+
+    public enum DataBase {
+        PATH_EMPTY("DataBase path is empty.");
+
+        public final String message;
+        private DataBase(String message) {
+            this.message = message;
+        }
+    }
 }
