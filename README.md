@@ -21,3 +21,25 @@ Al iniciar, la aplicación no deberá de tardar más de 1,5 segundos en
 inicializarse. Mostrará de base el Total de Gastos, Ganacias y lo
 Ahorrado del mes actual. La Vista Inicial se podrá elegir de las
 Vistas de Base, las cuales se verán  en un Menú de lado.
+
+# Git Commit convention
+- Structure
+
+#ID_Of_the_storyORtask **ACTION** _Description of what was done_
+
+## Actions
+
+- **ADD**
+- **REFACTOR**
+- **MOD**
+- **DELETE**
+
+## Examples
+
+#11 **ADD** _Entry object class_
+
+#11 **REFACTOR** _Entry object class and tests_
+
+#12 **MOD** _Category object class structure_
+
+#1 **DELETE** _Duplicate DataBaseManager classes_

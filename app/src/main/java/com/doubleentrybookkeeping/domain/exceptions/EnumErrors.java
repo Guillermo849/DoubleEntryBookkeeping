@@ -1,4 +1,4 @@
-package com.doubleentrybookkeeping.data.local;
+package com.doubleentrybookkeeping.domain.exceptions;
 
 public class EnumErrors {
     public enum Models {
