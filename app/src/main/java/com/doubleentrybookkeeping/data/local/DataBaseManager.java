@@ -2,9 +2,12 @@ package com.doubleentrybookkeeping.data.local;
 
 
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
+import com.doubleentrybookkeeping.domain.models.DbObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+
+import kotlin.NotImplementedError;
 
 public class DataBaseManager {
     private final File dbFile;
@@ -32,5 +35,17 @@ public class DataBaseManager {
 
     public String getDbPath() {
         return dbFile.getPath();
+    }
+
+    public DbObject addDbObject(DbObject dbObject) {
+        throw new NotImplementedError();
+    }
+
+    public DbObject modifyDbObject(DbObject dbObject) {
+        throw new NotImplementedError();
+    }
+
+    public void deleteDbObject(DbObject dbObject) {
+        throw new NotImplementedError();
     }
 }
