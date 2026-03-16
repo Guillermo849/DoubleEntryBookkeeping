@@ -2,7 +2,7 @@ package com.doubleentrybookkeeping.domain.models;
 
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 
-public class Category {
+public class Category extends DbObject {
     private final int id;
     private int baseCategoryId;
     private String name;
