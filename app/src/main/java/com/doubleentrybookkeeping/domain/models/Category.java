@@ -1,6 +1,6 @@
 package com.doubleentrybookkeeping.domain.models;
 
-import com.doubleentrybookkeeping.data.local.EnumErrors;
+import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 
 public class Category {
     private final int id;

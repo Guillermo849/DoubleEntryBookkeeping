@@ -1,16 +1,18 @@
 package com.doubleentrybookkeeping.data.local;
 
 
+import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 
 public class DataBaseManager {
-    private final File categoryDb;
+    private final File dbFile;
 
     public DataBaseManager(String pathToDb) throws FileNotFoundException {
         checkDataBasePathIsEmpty(pathToDb);
 
-        categoryDb = new File(pathToDb);
+        dbFile = new File(pathToDb);
         checkDataBaseFileExists();
     }
 
@@ -25,10 +27,10 @@ public class DataBaseManager {
     }
 
     public boolean categoryDbExists() {
-        return categoryDb.exists();
+        return dbFile.exists();
     }
 
     public String getDbPath() {
-        return categoryDb.getPath();
+        return dbFile.getPath();
     }
 }

@@ -1,12 +1,10 @@
 package com.doubleentrybookkeeping.domain.models;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 
-import com.doubleentrybookkeeping.data.local.EnumErrors;
+import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 public class CategoryTests {

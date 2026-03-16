@@ -12,7 +12,8 @@ public class EnumErrors {
     }
 
     public enum DataBase {
-        PATH_EMPTY("DataBase path is empty."), FILE_NOT_EXISTS("File doesn't exists");
+        PATH_EMPTY("DataBase path is empty."),
+        FILE_NOT_EXISTS("File doesn't exists");
         public final String message;
 
         DataBase(String message) {
