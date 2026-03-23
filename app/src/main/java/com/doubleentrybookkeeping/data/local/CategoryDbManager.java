@@ -1,8 +1,13 @@
 package com.doubleentrybookkeeping.data.local;
 
+import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
+import com.doubleentrybookkeeping.domain.models.Category;
 import com.doubleentrybookkeeping.domain.models.DbObject;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 import kotlin.NotImplementedError;
 
@@ -26,5 +31,26 @@ public class CategoryDbManager extends DataBaseManager{
     @Override
     public void deleteDbObject(DbObject dbObject) {
         throw new NotImplementedError();
+    }
+
+    public Category getCategoryById(int id) throws IOException {
+        try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
+            String line;
+            br.readLine();
+            while((line = br.readLine()) != null) {
+                String[] columnValues = line.split(",");
+                Category lineCategory = new Category (
+                        Integer.parseInt(columnValues[0]),
+                        Integer.parseInt(columnValues[2]),
+                        columnValues[1]);
+                if (lineCategory.getCategoryId() == id)
+                    return lineCategory;
+            }
+        }catch (NumberFormatException ex) {
+            throw new NumberFormatException(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "base_category");
+        } catch (IOException ex) {
+            throw new IOException(ex.getMessage());
+        }
+        return null;
     }
 }
