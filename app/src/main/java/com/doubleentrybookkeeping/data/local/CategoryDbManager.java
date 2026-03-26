@@ -21,9 +21,15 @@ public class CategoryDbManager extends DataBaseManager {
     }
 
 
-    @Override
-    public DbObject addDbObject(DbObject dbObject) {
-        throw new NotImplementedError();
+    public void addCategory(Category category) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath(), true));
+        bw.write(to_csv_format(category));
+        bw.newLine();
+        bw.close();
+    }
+
+    private String to_csv_format(Category category) {
+        return category.getCategoryId() + "," + category.getCategoryName() + "," + category.getBaseCategoryId();
     }
 
     @Override

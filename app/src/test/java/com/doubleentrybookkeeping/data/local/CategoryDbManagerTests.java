@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
+import com.doubleentrybookkeeping.domain.models.Category;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,11 +20,16 @@ public class CategoryDbManagerTests {
     public CategoryDbManagerTests() throws FileNotFoundException {
     }
 
-
     @Test
     public void check_that_CategoryDbManager_extends_from_DataBaseManagerTest() {
         Assert.assertEquals(pathToDb, categoryDbManager.getDbPath());
         Assert.assertTrue(categoryDbManager.categoryDbExists());
+    }
+
+    @Test
+    public void add_Category_Is_OK() throws IOException {
+        CategoryDbManager categoryDbManager = new CategoryDbManager(pathToDb);
+        categoryDbManager.addCategory(new Category(15,15,"quince"));
     }
 
     @Test
