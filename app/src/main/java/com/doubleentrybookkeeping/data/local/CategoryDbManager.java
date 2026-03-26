@@ -31,8 +31,7 @@ public class CategoryDbManager extends DataBaseManager {
         throw new NotImplementedError();
     }
 
-    @Override
-    public void deleteDbObject(int categoryId) throws IOException {
+    public void deleteCategory(int categoryId) throws IOException {
         HashSet<String> newDbInformation = new HashSet<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
@@ -40,22 +39,26 @@ public class CategoryDbManager extends DataBaseManager {
             newDbInformation.add(br.readLine());
             while ((line = br.readLine()) != null) {
                 String[] columnValues = line.split(",");
+
                 int dbCategoryId = Integer.parseInt(columnValues[0]);
-                if (dbCategoryId != categoryId) {
+                if (dbCategoryId != categoryId)
                     newDbInformation.add(line);
-                }
             }
             br.close();
 
-            BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath()));
-            for (var newCategoryLine : newDbInformation) {
-                bw.write(newCategoryLine);
-                bw.write("\n");
-            }
-            bw.close();
+            writeToCSV(newDbInformation);
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }
+    }
+
+    private void writeToCSV(HashSet<String> newDbInformation) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath()));
+        for (var newCategoryLine : newDbInformation) {
+            bw.write(newCategoryLine);
+            bw.write("\n");
+        }
+        bw.close();
     }
 
     public Category getCategoryById(int id) throws IOException {

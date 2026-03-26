@@ -49,7 +49,7 @@ public class CategoryDbManagerTests {
     @Test
     public void delete_category_is_ok() throws IOException {
         Assert.assertNotNull(categoryDbManager.getCategoryById(1));
-        categoryDbManager.deleteDbObject(1);
+        categoryDbManager.deleteCategory(1);
         Assert.assertNull(categoryDbManager.getCategoryById(1));
     }
 }
