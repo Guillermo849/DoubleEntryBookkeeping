@@ -45,4 +45,11 @@ public class CategoryDbManagerTests {
         Exception exception = assertThrows(NumberFormatException.class, () -> categoryDbManager.getCategoryById(2));
         Assert.assertEquals(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "base_category", exception.getMessage());
     }
+
+    @Test
+    public void delete_category_is_ok() throws IOException {
+        Assert.assertNotNull(categoryDbManager.getCategoryById(1));
+        categoryDbManager.deleteDbObject(1);
+        Assert.assertNull(categoryDbManager.getCategoryById(1));
+    }
 }
