@@ -2,7 +2,6 @@ package com.doubleentrybookkeeping.data.local;
 
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.Category;
-import com.doubleentrybookkeeping.domain.models.DbObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,9 +9,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-
-import kotlin.NotImplementedError;
+import java.util.List;
 
 public class CategoryDbManager extends DataBaseManager {
 
@@ -23,44 +23,73 @@ public class CategoryDbManager extends DataBaseManager {
 
     public void addCategory(Category category) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath(), true));
-        bw.write(to_csv_format(category));
+        bw.write(toCsvFormat(category));
         bw.newLine();
         bw.close();
     }
 
-    private String to_csv_format(Category category) {
+    private String toCsvFormat(Category category) {
         return category.getCategoryId() + "," + category.getCategoryName() + "," + category.getBaseCategoryId();
     }
 
-    @Override
-    public DbObject modifyDbObject(DbObject dbObject) {
-        throw new NotImplementedError();
-    }
-
-    public void deleteCategory(int categoryId) throws IOException {
+    public void modifyCategory(Category category) throws IOException {
         HashSet<String> newDbInformation = new HashSet<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
+            boolean modified = false;
+
             String line;
             newDbInformation.add(br.readLine());
             while ((line = br.readLine()) != null) {
                 String[] columnValues = line.split(",");
 
                 int dbCategoryId = Integer.parseInt(columnValues[0]);
-                if (dbCategoryId != categoryId)
-                    newDbInformation.add(line);
+                if (dbCategoryId == category.getCategoryId()) {
+                    modified = true;
+                    newDbInformation.add(toCsvFormat(category));
+                }
             }
             br.close();
 
-            writeToCSV(newDbInformation);
+            if (modified)
+                writeToCSV(newDbInformation);
+        } catch (IOException ex) {
+            throw new IOException(ex.getMessage());
+        }
+    }
+
+    public void deleteCategory(int categoryId) throws IOException {
+        HashSet<String> newDbInformation = new HashSet<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
+            boolean deleted = false;
+
+            String line;
+            newDbInformation.add(br.readLine());
+            while ((line = br.readLine()) != null) {
+                String[] columnValues = line.split(",");
+
+                int dbCategoryId = Integer.parseInt(columnValues[0]);
+                if (dbCategoryId != categoryId) {
+                    deleted = true;
+                    newDbInformation.add(line);
+                }
+            }
+            br.close();
+
+            if (deleted)
+                writeToCSV(newDbInformation);
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }
     }
 
     private void writeToCSV(HashSet<String> newDbInformation) throws IOException {
+        List<String> informationIterator = new ArrayList<>(newDbInformation);
+        Collections.reverse(informationIterator);
         BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath()));
-        for (var newCategoryLine : newDbInformation) {
+
+        for (var newCategoryLine : informationIterator) {
             bw.write(newCategoryLine);
             bw.write("\n");
         }

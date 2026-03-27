@@ -1,6 +1,5 @@
 package com.doubleentrybookkeeping.data.local;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
@@ -29,7 +28,7 @@ public class CategoryDbManagerTests {
     @Test
     public void add_Category_Is_OK() throws IOException {
         CategoryDbManager categoryDbManager = new CategoryDbManager(pathToDb);
-        categoryDbManager.addCategory(new Category(15,15,"quince"));
+        categoryDbManager.addCategory(new Category(15, 15, "quince"));
     }
 
     @Test
@@ -50,6 +49,22 @@ public class CategoryDbManagerTests {
     public void get_category_with_invalid_base_id() {
         Exception exception = assertThrows(NumberFormatException.class, () -> categoryDbManager.getCategoryById(2));
         Assert.assertEquals(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "base_category", exception.getMessage());
+    }
+
+    @Test
+    public void modify_category_is_ok() throws IOException {
+        // Arrange
+        var oldCategory = categoryDbManager.getCategoryById(1);
+        var newCategory = new Category(oldCategory.getCategoryId(), oldCategory.getCategoryName());
+        newCategory.setCategoryName("NewNameForCategory");
+
+        // Act
+        categoryDbManager.modifyCategory(newCategory);
+
+        // Assert
+        var modifiedCategory = categoryDbManager.getCategoryById(1);
+        Assert.assertNotEquals(oldCategory.getCategoryName(), modifiedCategory.getCategoryName());
+        Assert.assertEquals(oldCategory.getCategoryId(), modifiedCategory.getCategoryId());
     }
 
     @Test
