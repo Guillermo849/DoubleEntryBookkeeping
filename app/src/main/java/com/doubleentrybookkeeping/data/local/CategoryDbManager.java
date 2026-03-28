@@ -62,7 +62,6 @@ public class CategoryDbManager extends DataBaseManager {
         HashSet<String> newDbInformation = new HashSet<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
-            boolean deleted = false;
 
             String line;
             newDbInformation.add(br.readLine());
@@ -70,15 +69,12 @@ public class CategoryDbManager extends DataBaseManager {
                 String[] columnValues = line.split(",");
 
                 int dbCategoryId = Integer.parseInt(columnValues[0]);
-                if (dbCategoryId != categoryId) {
-                    deleted = true;
+                if (dbCategoryId != categoryId)
                     newDbInformation.add(line);
-                }
             }
             br.close();
 
-            if (deleted)
-                writeToCSV(newDbInformation);
+            writeToCSV(newDbInformation);
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }
