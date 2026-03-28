@@ -1,5 +1,7 @@
 package com.doubleentrybookkeeping.data.local;
 
+import androidx.annotation.NonNull;
+
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.Category;
 
@@ -62,15 +64,25 @@ public class CategoryDbManager extends DataBaseManager {
         HashSet<String> newDbInformation = new HashSet<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
-
             String line;
             newDbInformation.add(br.readLine());
+
             while ((line = br.readLine()) != null) {
                 String[] columnValues = line.split(",");
 
-                int dbCategoryId = Integer.parseInt(columnValues[0]);
-                if (dbCategoryId != categoryId)
-                    newDbInformation.add(line);
+                try{
+                    int dbCategoryId = Integer.parseInt(columnValues[0]);
+                    int dbBaseCategoryId = Integer.parseInt(columnValues[2]);
+
+                    if (dbCategoryId != categoryId && dbBaseCategoryId != categoryId)
+                        newDbInformation.add(line);
+
+                    if (dbBaseCategoryId == categoryId) {
+                        var childCategory = getCategoryFromLine(columnValues);
+                        childCategory.setBaseCategoryId(0);
+                        newDbInformation.add(toCsvFormat(childCategory));
+                    }
+                } catch (NumberFormatException ignored) {}
             }
             br.close();
 
@@ -98,10 +110,8 @@ public class CategoryDbManager extends DataBaseManager {
             br.readLine();
             while ((line = br.readLine()) != null) {
                 String[] columnValues = line.split(",");
-                Category lineCategory = new Category(
-                        Integer.parseInt(columnValues[0]),
-                        Integer.parseInt(columnValues[2]),
-                        columnValues[1]);
+                Category lineCategory = getCategoryFromLine(columnValues);
+
                 if (lineCategory.getCategoryId() == id)
                     return lineCategory;
             }
@@ -111,5 +121,12 @@ public class CategoryDbManager extends DataBaseManager {
             throw new IOException(ex.getMessage());
         }
         return null;
+    }
+
+    private static Category getCategoryFromLine(String[] columnValues) {
+        return new Category(
+                Integer.parseInt(columnValues[0]),
+                Integer.parseInt(columnValues[2]),
+                columnValues[1]);
     }
 }

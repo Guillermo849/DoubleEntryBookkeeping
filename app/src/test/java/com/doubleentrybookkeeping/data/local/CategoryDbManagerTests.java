@@ -109,6 +109,20 @@ public class CategoryDbManagerTests {
         testCleanUp();
     }
 
+    @Test
+    public void delete_base_category_sets_child_categories_base_category_column_to_0() throws IOException {
+        // Arrange
+        testStartUp();
+
+        // Act
+        categoryDbManager.deleteCategory(BaseCategory.getCategoryId());
+
+        // Assert
+        Assert.assertEquals(0, categoryDbManager.getCategoryById(ChildCategory.getCategoryId()).getBaseCategoryId());
+
+        testCleanUp();
+    }
+
     private void addInvalidCategoryToDb(Object id, Object baseCategoryId, Object name) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(categoryDbManager.getDbPath(), true));
         bw.write(id + "," + name + "," + baseCategoryId);
