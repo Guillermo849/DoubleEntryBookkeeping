@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.io.FileNotFoundException;
 public class FilterDBManagerTests {
     @Test
-    public void nothing(){
+    public void return_entry_with_given_category(){
 
     }
 }
