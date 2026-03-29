@@ -2,7 +2,8 @@ package com.doubleentrybookkeeping.domain.exceptions;
 
 public class EnumErrors {
     public enum Models {
-        CATEGORY_CREATION("Category must contain a valid id and name.");
+        CATEGORY_CREATION("Category must contain a valid id and name."),
+        ENTRY_CREATION("Entry must contain a valid id, category, type, method, amount, date, and concept.");
 
         public final String message;
 
