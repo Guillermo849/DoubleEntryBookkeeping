@@ -24,10 +24,25 @@ public class CategoryDbManager extends DataBaseManager {
 
 
     public void addCategory(Category category) throws IOException {
+        addCategoryValidation(category);
         BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath(), true));
         bw.write(toCsvFormat(category));
         bw.newLine();
         bw.close();
+    }
+
+
+    public void addCategoryValidation(Category category) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(getDbPath()));
+        String line = br.readLine();
+
+        while(line != null){
+            if(line.equals(category)){
+                throw new NullPointerException(EnumErrors.Models.CATEGORY_CREATION.message);
+            }
+            line = br.readLine();
+        }
+        br.close();
     }
 
     private String toCsvFormat(Category category) {
