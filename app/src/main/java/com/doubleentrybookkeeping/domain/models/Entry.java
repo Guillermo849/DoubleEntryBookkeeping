@@ -1,84 +1,84 @@
 package com.doubleentrybookkeeping.domain.models;
 
-import java.util.Date;
-
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 
-public class Entry extends DbObject {
+import java.util.Date;
+
+public class Entry extends  DbObject{
+
     private final int id;
-    private Category category;
-    private String type;
-    private String method;
-    private double amount;
+    private int category;
+    private Type type;
+    private PayMethod payMethod;
+    private float amount;
     private Date date;
     private String concept;
+    private String image;
 
-    public Entry(int id, Category category, String type, String method, double amount, Date date, String concept) {
+    public Entry(int id, int category, Type type, PayMethod method, float amount) {
         this.id = id;
         this.category = category;
         this.type = type;
-        this.method = method;
+        this.payMethod = method;
+        this.amount = amount;
+    }
+
+    public Entry(int id, int category, Type type, PayMethod method, float amount, Date date, String concept, String image) {
+        this.id = id;
+        this.category = category;
+        this.type = type;
+        this.payMethod = method;
         this.amount = amount;
         this.date = date;
         this.concept = concept;
+        this.image = image;
     }
 
-    public int getEntryId() {
+    private void ParametersAreValid(int id) {
+        if (id <= 0)
+            throw new NullPointerException(EnumErrors.Models.CATEGORY_CREATION.message);
+    }
+
+    public int getId() {
         return id;
     }
 
-    public Category getEntryCategory() {
+    public int getCategory() {
         return category;
     }
 
-    public void setEntryCategory(Category category) {
-        this.category = category;
-    }
-
-    public String getEntryType() {
+    public Type getType() {
         return type;
     }
 
-    public void setEntryType(String type) {
-        this.type = type;
+    public PayMethod getPayMethod() {
+        return payMethod;
     }
 
-    public String getEntryMethod() {
-        return method;
-    }
-
-    public void setEntryMethod(String method) {
-        this.method = method;
-    }
-
-    public double getEntryAmount() {
+    public float getAmount() {
         return amount;
     }
 
-    public void setEntryAmount(double amount) {
-        this.amount = amount;
-    }
-
-    public Date getEntryDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setEntryDate(Date date) {
-        this.date = date;
-    }
-
-    public String getEntryConcept() {
+    public String getConcept() {
         return concept;
     }
 
-    public void setEntryConcept(String concept) {
-        this.concept = concept;
+    public String getImage() {
+        return image;
     }
 
-    private void ParametersAreValid(int id, Category category, String type, String method, double amount, Date date,
-                                    String concept) {
-        if (id <= 0 || category == null || type.isEmpty() || method.isEmpty() || amount <= 0 || date == null
-                || concept.isEmpty())
-            throw new NullPointerException(EnumErrors.Models.ENTRY_CREATION.message);
+    public enum Type {
+        EXPENSES,
+        REVENUE
+    }
+
+    public enum PayMethod {
+        CARD,
+        CASH
     }
 }
+
