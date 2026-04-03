@@ -45,7 +45,7 @@ public class FilterDBManager extends DataBaseManager{
         return null;
     }
 
-    public Entry[] FilterByType(Type type) {
+    public Entry[] FilterByType(Entry.Type type) {
 
         return null;
     }
@@ -53,19 +53,13 @@ public class FilterDBManager extends DataBaseManager{
     private Entry toEntry(String[] values) {
         return new Entry(
                 Integer.parseInt(values[0]),
-                Integer.parseInt(values[2]),
-                Integer.parseInt(values[3]),
-                values[4],
-                Float.parseFloat(values[5]),
-                new Date(Long.parseLong(values[6])),
-                values[7],
-                values[8]
+                Integer.parseInt(values[1]),
+                Entry.Type.valueOf(values[2]),
+                Entry.PayMethod.valueOf(values[3]),
+                Float.parseFloat(values[4]),
+                new Date(Long.parseLong(values[5])),
+                values[6],
+                values[7]
         );
     }
-
-    public enum Type {
-        EXPENSES,
-        REVENUE
-    }
-
 }

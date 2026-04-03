@@ -8,26 +8,26 @@ public class Entry extends  DbObject{
 
     private final int id;
     private int category;
-    private int type;
-    private String method;
+    private Type type;
+    private PayMethod payMethod;
     private float amount;
     private Date date;
     private String concept;
     private String image;
 
-    public Entry(int id, int category, int type, String method, float amount) {
+    public Entry(int id, int category, Type type, PayMethod method, float amount) {
         this.id = id;
         this.category = category;
         this.type = type;
-        this.method = method;
+        this.payMethod = method;
         this.amount = amount;
     }
 
-    public Entry(int id, int category, int type, String method, float amount, Date date, String concept, String image) {
+    public Entry(int id, int category, Type type, PayMethod method, float amount, Date date, String concept, String image) {
         this.id = id;
         this.category = category;
         this.type = type;
-        this.method = method;
+        this.payMethod = method;
         this.amount = amount;
         this.date = date;
         this.concept = concept;
@@ -47,12 +47,12 @@ public class Entry extends  DbObject{
         return category;
     }
 
-    public int getType() {
+    public Type getType() {
         return type;
     }
 
-    public String getMethod() {
-        return method;
+    public PayMethod getPayMethod() {
+        return payMethod;
     }
 
     public float getAmount() {
@@ -70,4 +70,15 @@ public class Entry extends  DbObject{
     public String getImage() {
         return image;
     }
+
+    public enum Type {
+        EXPENSES,
+        REVENUE
+    }
+
+    public enum PayMethod {
+        CARD,
+        CASH
+    }
 }
+
