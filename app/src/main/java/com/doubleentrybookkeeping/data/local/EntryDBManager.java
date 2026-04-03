@@ -1,6 +1,5 @@
 package com.doubleentrybookkeeping.data.local;
 
-import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.DbObject;
 import com.doubleentrybookkeeping.domain.models.Entry;
 
@@ -15,20 +14,20 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntryManager extends DataBaseManager {
+public class EntryDBManager extends DataBaseManager {
 
-    public EntryManager(String pathToDb) throws FileNotFoundException {
+    public EntryDBManager(String pathToDb) throws FileNotFoundException {
         super(pathToDb);
     }
 
     private String entryToCsvInfo(Entry entry) {
-        return entry.getEntryId() + "," +
-                entry.getEntryCategory() + "," +
-                entry.getEntryType() + "," +
-                entry.getEntryMethod() + "," +
-                entry.getEntryAmount() + "," +
-                entry.getEntryDate() + "," +
-                entry.getEntryConcept() + ",";
+        return entry.getId() + "," +
+                entry.getCategory() + "," +
+                entry.getType() + "," +
+                entry.getPayMethod() + "," +
+                entry.getAmount() + "," +
+                entry.getDate() + "," +
+                entry.getConcept() + ",";
     }
 
     @Override
@@ -54,7 +53,7 @@ public class EntryManager extends DataBaseManager {
             String line;
             while ((line = bR.readLine()) != null) {
                 String[] values = line.split(",");
-                if (values.length > 0 && values[0].equals(String.valueOf(entry.getEntryId()))) {
+                if (values.length > 0 && values[0].equals(String.valueOf(entry.getId()))) {
                     lines.add(entryToCsvInfo(entry));
                 } else {
                     lines.add(line);
@@ -85,8 +84,8 @@ public class EntryManager extends DataBaseManager {
             String line;
             while ((line = bR.readLine()) != null) {
                 String[] values = line.split(",");
-                if (values.length > 0 && values[0].equals(String.valueOf(entry.getEntryId()))) {
-                    continue; // Skip the line to delete it
+                if (values.length > 0 && values[0].equals(String.valueOf(entry.getId()))) {
+                    continue;
                 }
                 lines.add(line);
             }
