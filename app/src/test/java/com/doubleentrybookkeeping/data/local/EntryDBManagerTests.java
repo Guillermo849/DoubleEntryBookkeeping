@@ -6,6 +6,7 @@ import com.doubleentrybookkeeping.domain.models.Category;
 import com.doubleentrybookkeeping.domain.models.DbObject;
 import com.doubleentrybookkeeping.domain.models.Entry;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
@@ -39,5 +40,15 @@ public class EntryDBManagerTests {
         Category category = new Category(1, "Supermercado");
         Entry entry = new Entry(3, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 15.0f);
         manager.deleteDbObject(entry);
+    }
+
+    @Test
+    public void return_entry_with_given_category() throws FileNotFoundException {
+        // Act
+        var filteredEntries = manager.FilterByCategory(3);
+        Entry entry = new Entry(1, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 15.0f);
+        // Assert
+        Assert.assertEquals(1, filteredEntries.length);
+        Assert.assertEquals(entry.getId(), filteredEntries[0].getId());
     }
 }

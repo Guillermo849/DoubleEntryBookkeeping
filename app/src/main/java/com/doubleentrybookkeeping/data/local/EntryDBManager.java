@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class EntryDBManager extends DataBaseManager {
@@ -100,5 +101,39 @@ public class EntryDBManager extends DataBaseManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public Entry[] FilterByCategory(int categoryID) {
+        List<Entry> foundEntries = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
+            String line;
+            br.readLine();
+
+            while((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+
+                Entry posibleEntry = toEntry(values);
+
+                if (posibleEntry.getCategory() == categoryID) {
+                    foundEntries.add(posibleEntry);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return foundEntries.toArray(new Entry[0]);
+    }
+
+    private Entry toEntry(String[] values) {
+        return new Entry(
+                Integer.parseInt(values[0]),
+                Integer.parseInt(values[1]),
+                Entry.Type.valueOf(values[2]),
+                Entry.PayMethod.valueOf(values[3]),
+                Float.parseFloat(values[4]),
+                new Date(Long.parseLong(values[5])),
+                values[6],
+                values[7]
+        );
     }
 }
