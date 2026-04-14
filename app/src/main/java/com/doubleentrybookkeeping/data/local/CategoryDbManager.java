@@ -7,6 +7,7 @@ import com.doubleentrybookkeeping.domain.models.Category;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -16,12 +17,33 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-public class CategoryDbManager extends DataBaseManager {
+public class CategoryDbManager {
 
+    private final File dbFile;
     public CategoryDbManager(String pathToDb) throws FileNotFoundException {
-        super(pathToDb);
+        checkDataBasePathIsEmpty(pathToDb);
+
+        dbFile = new File(pathToDb);
+        checkDataBaseFileExists();
     }
 
+    public void checkDataBasePathIsEmpty(String pathToDb){
+        if (pathToDb.isEmpty())
+            throw new NullPointerException(EnumErrors.DataBase.PATH_EMPTY.message);
+    }
+
+    public void checkDataBaseFileExists() throws FileNotFoundException {
+        if (!categoryDbExists())
+            throw new FileNotFoundException(EnumErrors.DataBase.FILE_NOT_EXISTS.message);
+    }
+
+    public boolean categoryDbExists() {
+        return dbFile.exists();
+    }
+
+    public String getDbPath() {
+        return dbFile.getPath();
+    }
 
     public void addCategory(Category category) throws IOException {
         addCategoryValidation(category);
@@ -30,7 +52,6 @@ public class CategoryDbManager extends DataBaseManager {
         bw.newLine();
         bw.close();
     }
-
 
     public void addCategoryValidation(Category category) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(getDbPath()));

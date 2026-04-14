@@ -20,7 +20,7 @@ public class DataBaseManagerTests {
 
     @Test
     public void check_that_db_path_was_created_correctly() {
-        Assert.assertEquals(pathToDb, manager.getDbPath());
+        Assert.assertEquals(pathToDb, manager.getCategoryManager().getDbPath());
     }
 
     @Test
@@ -31,7 +31,7 @@ public class DataBaseManagerTests {
 
     @Test
     public void check_that_db_file_exists() {
-        assertTrue(manager.categoryDbExists());
+        assertTrue(manager.getCategoryManager().categoryDbExists());
     }
 
     @Test
