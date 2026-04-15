@@ -1,9 +1,14 @@
 package com.doubleentrybookkeeping.data.local;
 
 
+import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
+
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
 
@@ -23,6 +28,16 @@ public class DataBaseManager {
 
     public EntryDBManager getEntryManager() {
         return entryDBManager;
+    }
+
+    public void exportDataBasesTo(String pathToExportFile) throws IOException {
+        File exportFile = new File(pathToExportFile);
+        exportFile.createNewFile();
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter(pathToExportFile, false));
+        bw.write(getDataBaseExportData());
+        bw.newLine();
+        bw.close();
     }
 
     public String getDataBaseExportData() {

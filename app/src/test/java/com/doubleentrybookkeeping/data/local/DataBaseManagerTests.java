@@ -9,7 +9,9 @@ import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class DataBaseManagerTests {
     private final String pathCategoryToDb = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\CategoryDB.csv";
@@ -20,12 +22,13 @@ public class DataBaseManagerTests {
     }
 
     @Test
-    public void check_that_db_path_was_created_correctly() {
+    public void data_base_managers_db_paths_are_ok() {
         Assert.assertEquals(pathCategoryToDb, manager.getCategoryManager().getDbPath());
+        Assert.assertEquals(pathToEntryDb, manager.getEntryManager().getDbPath());
     }
 
     @Test
-    public void throw_exception_when_db_path_is_empty() {
+    public void when_db_path_is_empty_throws_exception() {
         Exception exception = assertThrows(NullPointerException.class, () -> new DataBaseManager("", ""));
         assertEquals(EnumErrors.DataBase.PATH_EMPTY.message, exception.getMessage());
     }
@@ -37,7 +40,7 @@ public class DataBaseManagerTests {
     }
 
     @Test
-    public void throw_exception_db_file_doesnt_exists() {
+    public void db_file_doesnt_exists_throws_exception() {
         Exception exception = assertThrows(FileNotFoundException.class, () -> new DataBaseManager(".\\path\\to\\nowhere.csv", ".\\path\\to\\nowhere.csv"));
         assertEquals(EnumErrors.DataBase.FILE_NOT_EXISTS.message, exception.getMessage());
     }
@@ -47,5 +50,12 @@ public class DataBaseManagerTests {
         String expectedFormat = "id,name,base_category\n\n" +
                 "id,category,type,method,amount,date,concept,image\n";
         assertEquals(expectedFormat, manager.getDataBaseExportData());
+    }
+
+    @Test
+    public void export_data_bases_to_file_is_ok() throws IOException {
+        String exportPath = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\ExportedDb.csv";
+        manager.exportDataBasesTo(exportPath);
+        assertTrue(new File(exportPath).exists());
     }
 }
