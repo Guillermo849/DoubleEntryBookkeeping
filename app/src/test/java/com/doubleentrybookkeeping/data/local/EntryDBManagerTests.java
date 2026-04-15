@@ -10,7 +10,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 public class EntryDBManagerTests {
     private final String pathToDb = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\EntriesDB.csv";
@@ -45,10 +48,19 @@ public class EntryDBManagerTests {
     @Test
     public void return_entry_with_given_category() throws FileNotFoundException {
         // Act
-        var filteredEntries = manager.FilterByCategory(3);
+        var filteredEntries = manager.FilterByCategoryID(3);
         Entry entry = new Entry(1, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 15.0f);
         // Assert
-        Assert.assertEquals(1, filteredEntries.length);
-        Assert.assertEquals(entry.getId(), filteredEntries[0].getId());
+        assertEquals(1, filteredEntries.length);
+        assertEquals(entry.getId(), filteredEntries[0].getId());
     }
+
+    @Test
+    public void return_entry_with_given_date() throws FileNotFoundException {
+        // Act
+        var filteredEntries = manager.FilterByDate(new Date(Long.parseLong("20260201")));
+        // Assert
+        assertEquals(1, filteredEntries.length);
+    }
+
 }

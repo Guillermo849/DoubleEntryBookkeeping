@@ -14,6 +14,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class EntryDBManager extends DataBaseManager {
 
@@ -103,7 +104,31 @@ public class EntryDBManager extends DataBaseManager {
         }
     }
 
-    public Entry[] FilterByCategory(int categoryID) {
+    public Entry[] FilterByCategoryID(int categoryID){
+        return getEntriesByFiltrating(entry -> entry.getCategory() == categoryID);
+    }
+
+    public Entry[] FilterByType(Entry.Type type){
+        return getEntriesByFiltrating(entry -> entry.getType() == type);
+    }
+
+    public Entry[] FilterByPayMethod(Entry.PayMethod payMethod){
+        return getEntriesByFiltrating(entry -> entry.getPayMethod() == payMethod);
+    }
+
+    public Entry[] FilterByDate(Date date){
+        return getEntriesByFiltrating(entry -> entry.getDate().equals(date));
+    }
+
+    public Entry[] FilterByAmount(float amount){
+        return getEntriesByFiltrating(entry -> entry.getAmount() == amount);
+    }
+
+    public Entry[] FilterByAmountInRange(float maxAmount, float minAmount){
+        return getEntriesByFiltrating(entry -> entry.getAmount() <= maxAmount && entry.getAmount() >= minAmount);
+    }
+
+    public Entry[] getEntriesByFiltrating(Predicate<Entry> condition) {
         List<Entry> foundEntries = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
             String line;
@@ -114,7 +139,7 @@ public class EntryDBManager extends DataBaseManager {
 
                 Entry posibleEntry = toEntry(values);
 
-                if (posibleEntry.getCategory() == categoryID) {
+                if (condition.test(posibleEntry)) {
                     foundEntries.add(posibleEntry);
                 }
             }
