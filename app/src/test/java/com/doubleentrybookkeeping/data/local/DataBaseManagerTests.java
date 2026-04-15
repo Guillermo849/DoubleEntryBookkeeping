@@ -41,4 +41,11 @@ public class DataBaseManagerTests {
         Exception exception = assertThrows(FileNotFoundException.class, () -> new DataBaseManager(".\\path\\to\\nowhere.csv", ".\\path\\to\\nowhere.csv"));
         assertEquals(EnumErrors.DataBase.FILE_NOT_EXISTS.message, exception.getMessage());
     }
+
+    @Test
+    public void export_data_bases_format_is_ok() {
+        String expectedFormat = "id,name,base_category\n\n" +
+                "id,category,type,method,amount,date,concept,image\n";
+        assertEquals(expectedFormat, manager.getDataBaseExportData());
+    }
 }
