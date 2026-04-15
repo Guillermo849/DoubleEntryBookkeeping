@@ -12,31 +12,33 @@ import org.junit.Test;
 import java.io.FileNotFoundException;
 
 public class DataBaseManagerTests {
-    private final String pathToDb = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\CategoryDB.csv";
-    private final DataBaseManager manager = new DataBaseManager(pathToDb);
+    private final String pathCategoryToDb = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\CategoryDB.csv";
+    private final String pathToEntryDb = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\EntriesDB.csv";
+    private final DataBaseManager manager = new DataBaseManager(pathCategoryToDb, pathToEntryDb);
 
     public DataBaseManagerTests() throws FileNotFoundException {
     }
 
     @Test
     public void check_that_db_path_was_created_correctly() {
-        Assert.assertEquals(pathToDb, manager.getCategoryManager().getDbPath());
+        Assert.assertEquals(pathCategoryToDb, manager.getCategoryManager().getDbPath());
     }
 
     @Test
     public void throw_exception_when_db_path_is_empty() {
-        Exception exception = assertThrows(NullPointerException.class, () -> new DataBaseManager(""));
+        Exception exception = assertThrows(NullPointerException.class, () -> new DataBaseManager("", ""));
         assertEquals(EnumErrors.DataBase.PATH_EMPTY.message, exception.getMessage());
     }
 
     @Test
     public void check_that_db_file_exists() {
         assertTrue(manager.getCategoryManager().categoryDbExists());
+        assertTrue(manager.getEntryManager().entryDbExists());
     }
 
     @Test
     public void throw_exception_db_file_doesnt_exists() {
-        Exception exception = assertThrows(FileNotFoundException.class, () -> new DataBaseManager(".\\path\\to\\nowhere.csv"));
+        Exception exception = assertThrows(FileNotFoundException.class, () -> new DataBaseManager(".\\path\\to\\nowhere.csv", ".\\path\\to\\nowhere.csv"));
         assertEquals(EnumErrors.DataBase.FILE_NOT_EXISTS.message, exception.getMessage());
     }
 }

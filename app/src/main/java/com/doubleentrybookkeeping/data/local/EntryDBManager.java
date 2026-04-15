@@ -1,5 +1,6 @@
 package com.doubleentrybookkeeping.data.local;
 
+import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.DbObject;
 import com.doubleentrybookkeeping.domain.models.Entry;
 
@@ -16,10 +17,33 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class EntryDBManager extends DataBaseManager {
+public class EntryDBManager {
+
+    private final File dbFile;
 
     public EntryDBManager(String pathToDb) throws FileNotFoundException {
-        super(pathToDb);
+        checkDataBasePathIsEmpty(pathToDb);
+
+        dbFile = new File(pathToDb);
+        checkDataBaseFileExists();
+    }
+
+    public void checkDataBasePathIsEmpty(String pathToDb){
+        if (pathToDb.isEmpty())
+            throw new NullPointerException(EnumErrors.DataBase.PATH_EMPTY.message);
+    }
+
+    public void checkDataBaseFileExists() throws FileNotFoundException {
+        if (!entryDbExists())
+            throw new FileNotFoundException(EnumErrors.DataBase.FILE_NOT_EXISTS.message);
+    }
+
+    public boolean entryDbExists() {
+        return dbFile.exists();
+    }
+
+    public String getDbPath() {
+        return dbFile.getPath();
     }
 
     private String entryToCsvInfo(Entry entry) {
@@ -32,7 +56,6 @@ public class EntryDBManager extends DataBaseManager {
                 entry.getConcept() + ",";
     }
 
-    @Override
     public DbObject addDbObject(DbObject dbObject) {
         Entry entry = (Entry) dbObject;
         try (FileWriter fW = new FileWriter(getDbPath(), true);
@@ -45,7 +68,6 @@ public class EntryDBManager extends DataBaseManager {
         return entry;
     }
 
-    @Override
     public DbObject modifyDbObject(DbObject dbObject) {
         Entry entry = (Entry) dbObject;
         List<String> lines = new ArrayList<>();
@@ -76,7 +98,6 @@ public class EntryDBManager extends DataBaseManager {
         return entry;
     }
 
-    @Override
     public void deleteDbObject(DbObject dbObject) {
         Entry entry = (Entry) dbObject;
         List<String> lines = new ArrayList<>();
