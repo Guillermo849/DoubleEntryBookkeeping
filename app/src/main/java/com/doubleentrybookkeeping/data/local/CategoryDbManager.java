@@ -113,11 +113,6 @@ public class CategoryDbManager {
                     if (dbCategoryId != categoryId && dbBaseCategoryId != categoryId)
                         newDbInformation.add(line);
 
-                    if (dbBaseCategoryId == categoryId) {
-                        var childCategory = getCategoryFromLine(columnValues);
-                        childCategory.setBaseCategoryId(0);
-                        newDbInformation.add(toCsvFormat(childCategory));
-                    }
                 } catch (NumberFormatException ignored) {}
             }
             br.close();

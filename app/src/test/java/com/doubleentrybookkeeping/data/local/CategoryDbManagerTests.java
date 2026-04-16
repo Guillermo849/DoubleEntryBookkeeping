@@ -113,12 +113,13 @@ public class CategoryDbManagerTests {
     public void delete_base_category_sets_child_categories_base_category_column_to_0() throws IOException {
         // Arrange
         testStartUp();
+        Assert.assertEquals(1, categoryDbManager.getCategoryById(ChildCategory.getCategoryId()).getBaseCategoryId());
 
         // Act
         categoryDbManager.deleteCategory(BaseCategory.getCategoryId());
 
         // Assert
-        Assert.assertEquals(0, categoryDbManager.getCategoryById(ChildCategory.getCategoryId()).getBaseCategoryId());
+        Assert.assertNull(categoryDbManager.getCategoryById(ChildCategory.getCategoryId()));
 
         testCleanUp();
     }
