@@ -13,17 +13,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public class DataBaseManagerTests {
-    private final String pathCategoryToDb = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\CategoryDB.csv";
-    private final String pathToEntryDb = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\EntriesDB.csv";
-    private final DataBaseManager manager = new DataBaseManager(pathCategoryToDb, pathToEntryDb);
+public class DataBaseManagerTests extends TestBase {
 
     public DataBaseManagerTests() throws FileNotFoundException {
     }
 
     @Test
     public void data_base_managers_db_paths_are_ok() {
-        Assert.assertEquals(pathCategoryToDb, manager.getCategoryManager().getDbPath());
+        Assert.assertEquals(pathToCategoryDb, manager.getCategoryManager().getDbPath());
         Assert.assertEquals(pathToEntryDb, manager.getEntryManager().getDbPath());
     }
 
@@ -57,5 +54,10 @@ public class DataBaseManagerTests {
         String exportPath = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\ExportedDb.csv";
         manager.exportDataBasesTo(exportPath);
         assertTrue(new File(exportPath).exists());
+    }
+
+    @Test
+    public void delete_category_cascade_is_ok() {
+
     }
 }

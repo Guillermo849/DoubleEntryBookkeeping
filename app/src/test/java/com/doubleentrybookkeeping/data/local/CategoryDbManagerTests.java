@@ -13,21 +13,16 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class CategoryDbManagerTests {
-    private final String pathToDb = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\CategoryDB.csv";
+public class CategoryDbManagerTests extends TestBase{
 
-    private final CategoryDbManager categoryDbManager = new CategoryDbManager(pathToDb);
 
-    // Categories
-    private final Category BaseCategory = new Category(1, 0, "BaseCategory");
-    private final Category ChildCategory = new Category(2, 1, "ChildCategory");
 
     public CategoryDbManagerTests() throws FileNotFoundException {
     }
 
     @Test
     public void check_that_CategoryDbManager_extends_from_DataBaseManagerTest() {
-        Assert.assertEquals(pathToDb, categoryDbManager.getDbPath());
+        Assert.assertEquals(pathToCategoryDb, categoryDbManager.getDbPath());
         Assert.assertTrue(categoryDbManager.categoryDbExists());
     }
 
@@ -129,15 +124,5 @@ public class CategoryDbManagerTests {
         bw.write(id + "," + name + "," + baseCategoryId);
         bw.newLine();
         bw.close();
-    }
-
-    private void testStartUp() throws IOException {
-        categoryDbManager.addCategory(BaseCategory);
-        categoryDbManager.addCategory(ChildCategory);
-    }
-
-    private void testCleanUp() throws IOException {
-        categoryDbManager.deleteCategory(BaseCategory.getCategoryId());
-        categoryDbManager.deleteCategory(ChildCategory.getCategoryId());
     }
 }
