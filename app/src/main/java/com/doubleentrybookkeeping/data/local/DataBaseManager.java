@@ -6,6 +6,7 @@ import com.doubleentrybookkeeping.domain.models.DbObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import kotlin.NotImplementedError;
 
@@ -45,7 +46,7 @@ public class DataBaseManager {
         throw new NotImplementedError();
     }
 
-    public void deleteDbObject(DbObject dbObject) {
+    public void deleteDbObject(int dbObjectId) throws IOException {
         throw new NotImplementedError();
     }
 }
