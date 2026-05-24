@@ -2,51 +2,63 @@ package com.doubleentrybookkeeping.data.local;
 
 
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
-import com.doubleentrybookkeeping.domain.models.DbObject;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-
-import kotlin.NotImplementedError;
+import java.util.HashSet;
 
 public class DataBaseManager {
-    private final File dbFile;
+    private final CategoryDbManager categoryDbManager;
 
-    public DataBaseManager(String pathToDb) throws FileNotFoundException {
-        checkDataBasePathIsEmpty(pathToDb);
+    private final EntryDBManager entryDBManager;
 
-        dbFile = new File(pathToDb);
-        checkDataBaseFileExists();
+    public DataBaseManager(String pathToCategoryDb, String pathToEntryDb) throws FileNotFoundException {
+        categoryDbManager = new CategoryDbManager(pathToCategoryDb);
+        entryDBManager = new EntryDBManager(pathToEntryDb);
     }
 
-    public void checkDataBasePathIsEmpty(String pathToDb){
-        if (pathToDb.isEmpty())
-            throw new NullPointerException(EnumErrors.DataBase.PATH_EMPTY.message);
+    public CategoryDbManager getCategoryManager() {
+        return categoryDbManager;
     }
 
-    public void checkDataBaseFileExists() throws FileNotFoundException {
-        if (!categoryDbExists())
-            throw new FileNotFoundException(EnumErrors.DataBase.FILE_NOT_EXISTS.message);
+    public EntryDBManager getEntryManager() {
+        return entryDBManager;
     }
 
-    public boolean categoryDbExists() {
-        return dbFile.exists();
+    public void exportDataBasesTo(String pathToExportFile) throws IOException {
+        File exportFile = new File(pathToExportFile);
+        exportFile.createNewFile();
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter(pathToExportFile, false));
+        bw.write(getDataBaseExportData());
+        bw.newLine();
+        bw.close();
     }
 
-    public String getDbPath() {
-        return dbFile.getPath();
+    public String getDataBaseExportData() {
+        StringBuilder exportDbDataBuilder = new StringBuilder();
+
+        getDataFromDb(exportDbDataBuilder, categoryDbManager.getDbPath());
+        exportDbDataBuilder.append("\n");
+        getDataFromDb(exportDbDataBuilder, entryDBManager.getDbPath());
+
+        return exportDbDataBuilder.toString();
     }
 
-    public DbObject addDbObject(DbObject dbObject) {
-        throw new NotImplementedError();
-    }
+    private void getDataFromDb(StringBuilder exportDbDataBuilder, String dbpath) {
+        try (BufferedReader br = new BufferedReader(new FileReader(dbpath))) {
+            String line;
 
-    public DbObject modifyDbObject(DbObject dbObject) {
-        throw new NotImplementedError();
-    }
+            while ((line = br.readLine()) != null)
+                exportDbDataBuilder.append(line).append("\n");
 
-    public void deleteDbObject(int dbObjectId) throws IOException {
-        throw new NotImplementedError();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

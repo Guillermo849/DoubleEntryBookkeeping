@@ -1,40 +1,99 @@
 package com.doubleentrybookkeeping.data.local;
 
+import androidx.annotation.NonNull;
+
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.Category;
-import com.doubleentrybookkeeping.domain.models.DbObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
-import kotlin.NotImplementedError;
+public class CategoryDbManager {
 
-public class CategoryDbManager extends DataBaseManager {
-
+    private final File dbFile;
     public CategoryDbManager(String pathToDb) throws FileNotFoundException {
-        super(pathToDb);
+        checkDataBasePathIsEmpty(pathToDb);
+
+        dbFile = new File(pathToDb);
+        checkDataBaseFileExists();
     }
 
+    public void checkDataBasePathIsEmpty(String pathToDb){
+        if (pathToDb.isEmpty())
+            throw new NullPointerException(EnumErrors.DataBase.PATH_EMPTY.message);
+    }
+
+    public void checkDataBaseFileExists() throws FileNotFoundException {
+        if (!categoryDbExists())
+            throw new FileNotFoundException(EnumErrors.DataBase.FILE_NOT_EXISTS.message);
+    }
+
+    public boolean categoryDbExists() {
+        return dbFile.exists();
+    }
+
+    public String getDbPath() {
+        return dbFile.getPath();
+    }
 
     public void addCategory(Category category) throws IOException {
+        addCategoryValidation(category);
         BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath(), true));
-        bw.write(to_csv_format(category));
+        bw.write(toCsvFormat(category));
         bw.newLine();
         bw.close();
     }
 
-    private String to_csv_format(Category category) {
+    public void addCategoryValidation(Category category) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(getDbPath()));
+        String line = br.readLine();
+
+        while(line != null){
+            if(line.equals(category)){
+                throw new NullPointerException(EnumErrors.Models.CATEGORY_CREATION.message);
+            }
+            line = br.readLine();
+        }
+        br.close();
+    }
+
+    private String toCsvFormat(Category category) {
         return category.getCategoryId() + "," + category.getCategoryName() + "," + category.getBaseCategoryId();
     }
 
-    @Override
-    public DbObject modifyDbObject(DbObject dbObject) {
-        throw new NotImplementedError();
+    public void modifyCategory(Category category) throws IOException {
+        HashSet<String> newDbInformation = new HashSet<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
+            boolean modified = false;
+
+            String line;
+            newDbInformation.add(br.readLine());
+            while ((line = br.readLine()) != null) {
+                String[] columnValues = line.split(",");
+
+                int dbCategoryId = Integer.parseInt(columnValues[0]);
+                if (dbCategoryId == category.getCategoryId()) {
+                    modified = true;
+                    newDbInformation.add(toCsvFormat(category));
+                }
+            }
+            br.close();
+
+            if (modified)
+                writeToCSV(newDbInformation);
+        } catch (IOException ex) {
+            throw new IOException(ex.getMessage());
+        }
     }
 
     public void deleteCategory(int categoryId) throws IOException {
@@ -43,12 +102,18 @@ public class CategoryDbManager extends DataBaseManager {
         try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
             String line;
             newDbInformation.add(br.readLine());
+
             while ((line = br.readLine()) != null) {
                 String[] columnValues = line.split(",");
 
-                int dbCategoryId = Integer.parseInt(columnValues[0]);
-                if (dbCategoryId != categoryId)
-                    newDbInformation.add(line);
+                try{
+                    int dbCategoryId = Integer.parseInt(columnValues[0]);
+                    int dbBaseCategoryId = Integer.parseInt(columnValues[2]);
+
+                    if (dbCategoryId != categoryId && dbBaseCategoryId != categoryId)
+                        newDbInformation.add(line);
+
+                } catch (NumberFormatException ignored) {}
             }
             br.close();
 
@@ -59,8 +124,11 @@ public class CategoryDbManager extends DataBaseManager {
     }
 
     private void writeToCSV(HashSet<String> newDbInformation) throws IOException {
+        List<String> informationIterator = new ArrayList<>(newDbInformation);
+        Collections.reverse(informationIterator);
         BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath()));
-        for (var newCategoryLine : newDbInformation) {
+
+        for (var newCategoryLine : informationIterator) {
             bw.write(newCategoryLine);
             bw.write("\n");
         }
@@ -73,10 +141,8 @@ public class CategoryDbManager extends DataBaseManager {
             br.readLine();
             while ((line = br.readLine()) != null) {
                 String[] columnValues = line.split(",");
-                Category lineCategory = new Category(
-                        Integer.parseInt(columnValues[0]),
-                        Integer.parseInt(columnValues[2]),
-                        columnValues[1]);
+                Category lineCategory = getCategoryFromLine(columnValues);
+
                 if (lineCategory.getCategoryId() == id)
                     return lineCategory;
             }
@@ -86,5 +152,12 @@ public class CategoryDbManager extends DataBaseManager {
             throw new IOException(ex.getMessage());
         }
         return null;
+    }
+
+    private static Category getCategoryFromLine(String[] columnValues) {
+        return new Category(
+                Integer.parseInt(columnValues[0]),
+                Integer.parseInt(columnValues[2]),
+                columnValues[1]);
     }
 }

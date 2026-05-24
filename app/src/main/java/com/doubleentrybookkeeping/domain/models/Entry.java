@@ -34,9 +34,11 @@ public class Entry extends  DbObject{
         this.image = image;
     }
 
-    private void ParametersAreValid(int id) {
+    private void ParametersAreValid(int id, Date date) {
         if (id <= 0)
-            throw new NullPointerException(EnumErrors.Models.CATEGORY_CREATION.message);
+            throw new NullPointerException(EnumErrors.Models.ENTRY_CREATION.message);
+        if (date == null)
+            throw new NullPointerException(EnumErrors.Models.ENTRY_CREATION.message);
     }
 
     public int getId() {
