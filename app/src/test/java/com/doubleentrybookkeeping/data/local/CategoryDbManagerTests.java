@@ -12,6 +12,7 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 
 public class CategoryDbManagerTests extends TestBase{
 
@@ -28,7 +29,28 @@ public class CategoryDbManagerTests extends TestBase{
 
     @Test
     public void add_Category_Is_OK() throws IOException {
-        categoryDbManager.addCategory(new Category(15, 15, "quince"));
+        // Act
+        categoryDbManager.addCategory(BaseCategory);
+
+        // Assert
+        var category = categoryDbManager.getCategoryById(BaseCategory.getCategoryId());
+        Assert.assertNotNull(category);
+
+        testCleanUp();
+    }
+
+    @Test
+    public void add_Category_Already_Exists_In_DataBase_Throws_Error() throws IOException{
+        // Arrange
+        categoryDbManager.addCategory(BaseCategory);
+
+        // Act
+        Exception exception = assertThrows(InvalidObjectException.class, () -> categoryDbManager.addCategory(BaseCategory));
+
+        // Assert
+        Assert.assertEquals(EnumErrors.CategoryDbManagerActions.CATEGORY_EXISTS.message, exception.getMessage());
+
+        testCleanUp();
     }
 
     @Test
@@ -57,7 +79,7 @@ public class CategoryDbManagerTests extends TestBase{
     }
 
     @Test
-    public void get_category_with_invalid_base_id() throws IOException {
+    public void get_category_with_invalid_base_id_throws_exception() throws IOException {
         // Arrange
         addInvalidCategoryToDb(3, "asdf", "Invalid Category");
 

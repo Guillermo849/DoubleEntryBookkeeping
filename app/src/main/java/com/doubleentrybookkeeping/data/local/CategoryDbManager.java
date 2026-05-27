@@ -1,7 +1,5 @@
 package com.doubleentrybookkeeping.data.local;
 
-import androidx.annotation.NonNull;
-
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.Category;
 
@@ -12,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -46,24 +45,13 @@ public class CategoryDbManager {
     }
 
     public void addCategory(Category category) throws IOException {
-        addCategoryValidation(category);
+        if(getCategoryByName(category.getCategoryName()) != null){
+            throw new InvalidObjectException(EnumErrors.CategoryDbManagerActions.CATEGORY_EXISTS.message);
+        }
         BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath(), true));
         bw.write(toCsvFormat(category));
         bw.newLine();
         bw.close();
-    }
-
-    public void addCategoryValidation(Category category) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(getDbPath()));
-        String line = br.readLine();
-
-        while(line != null){
-            if(line.equals(category)){
-                throw new NullPointerException(EnumErrors.Models.CATEGORY_CREATION.message);
-            }
-            line = br.readLine();
-        }
-        br.close();
     }
 
     private String toCsvFormat(Category category) {
@@ -147,6 +135,26 @@ public class CategoryDbManager {
                     return lineCategory;
             }
         } catch (NumberFormatException ex) {
+            throw new NumberFormatException(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "base_category");
+        } catch (IOException ex) {
+            throw new IOException(ex.getMessage());
+        }
+        return null;
+    }
+
+    public  Category getCategoryByName(String name) throws IOException{
+        try (BufferedReader br = new BufferedReader(new FileReader((getDbPath())))) {
+            String line;
+            br.readLine();
+            while((line = br.readLine()) != null){
+                String[] columnValues = line.split(",");
+                Category lineCategory = getCategoryFromLine(columnValues);
+
+                if (lineCategory.getCategoryName().equals(name)){
+                    return lineCategory;
+                }
+            }
+        }catch (NumberFormatException ex){
             throw new NumberFormatException(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "base_category");
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
