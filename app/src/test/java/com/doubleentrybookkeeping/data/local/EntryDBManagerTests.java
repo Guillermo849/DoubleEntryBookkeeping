@@ -45,7 +45,7 @@ public class EntryDBManagerTests extends TestBase{
     public void return_entry_with_given_category() throws FileNotFoundException {
         // Act
         var filteredEntries = entryDbManager.FilterByCategoryID(3);
-        Entry entry = new Entry(1, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 15.0f);
+        Entry entry = new Entry(2, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 15.0f);
         // Assert
         assertEquals(1, filteredEntries.length);
         assertEquals(entry.getId(), filteredEntries[0].getId());
