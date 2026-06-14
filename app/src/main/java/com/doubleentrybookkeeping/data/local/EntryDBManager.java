@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -125,6 +126,10 @@ public class EntryDBManager {
         }
     }
 
+    public Entry[] FilterByID(int ID){
+        return getEntriesByFiltrating(entry -> entry.getId() == ID);
+    }
+
     public Entry[] FilterByCategoryID(int categoryID){
         return getEntriesByFiltrating(entry -> entry.getCategory() == categoryID);
     }
@@ -137,7 +142,7 @@ public class EntryDBManager {
         return getEntriesByFiltrating(entry -> entry.getPayMethod() == payMethod);
     }
 
-    public Entry[] FilterByDate(Date date){
+    public Entry[] FilterByDate(String date){
         return getEntriesByFiltrating(entry -> entry.getDate().equals(date));
     }
 
@@ -177,7 +182,7 @@ public class EntryDBManager {
                 Entry.Type.valueOf(values[2]),
                 Entry.PayMethod.valueOf(values[3]),
                 Float.parseFloat(values[4]),
-                new Date(Long.parseLong(values[5])),
+                values[5],
                 values[6],
                 values[7]
         );

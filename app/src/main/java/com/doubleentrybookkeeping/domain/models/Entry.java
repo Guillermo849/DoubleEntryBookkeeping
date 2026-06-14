@@ -11,7 +11,7 @@ public class Entry extends  DbObject{
     private Type type;
     private PayMethod payMethod;
     private float amount;
-    private Date date;
+    private String date;
     private String concept;
     private String image;
 
@@ -23,7 +23,7 @@ public class Entry extends  DbObject{
         this.amount = amount;
     }
 
-    public Entry(int id, int category, Type type, PayMethod method, float amount, Date date, String concept, String image) {
+    public Entry(int id, int category, Type type, PayMethod method, float amount, String date, String concept, String image) {
         this.id = id;
         this.category = category;
         this.type = type;
@@ -61,7 +61,7 @@ public class Entry extends  DbObject{
         return amount;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 

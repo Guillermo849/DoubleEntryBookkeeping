@@ -9,6 +9,7 @@ import com.doubleentrybookkeeping.domain.models.Entry;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
+import java.text.DateFormat;
 import java.util.Date;
 
 public class EntryDBManagerTests extends TestBase{
@@ -27,7 +28,7 @@ public class EntryDBManagerTests extends TestBase{
     @Test
     public void test_modifyDbObject_returns_entry() {
         Category category = new Category(1, "Supermercado");
-        Entry entry = new Entry(2, 1, Entry.Type.REVENUE, Entry.PayMethod.CASH, 15.0f, new Date(), "Sabrosura", "imagen");
+        Entry entry = new Entry(2, 1, Entry.Type.REVENUE, Entry.PayMethod.CASH, 15.0f, "14/06/2026", "Sabrosura", "imagen");
         DbObject returnedObject = entryDbManager.modifyDbObject(entry);
         assertEquals(entry, returnedObject);
     }
@@ -53,7 +54,7 @@ public class EntryDBManagerTests extends TestBase{
     @Test
     public void return_entry_with_given_date() throws FileNotFoundException {
         // Act
-        var filteredEntries = entryDbManager.FilterByDate(new Date(Long.parseLong("20260201")));
+        var filteredEntries = entryDbManager.FilterByDate("14/06/2026");
         // Assert
         assertEquals(1, filteredEntries.length);
     }

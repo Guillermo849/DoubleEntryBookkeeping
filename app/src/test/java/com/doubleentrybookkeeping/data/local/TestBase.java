@@ -21,8 +21,8 @@ public class TestBase {
     protected final String pathToEntryDb = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\EntriesDB.csv";
     protected final EntryDBManager entryDbManager = new EntryDBManager(pathToEntryDb);
 
-    protected Entry entryWithBaseCategory = new Entry(1, BaseCategory.getCategoryId(), Entry.Type.REVENUE, Entry.PayMethod.CASH, 15.0f, new Date(), "Sabrosura", "imagen");
-    protected Entry entryWithChildCategory = new Entry(2, ChildCategory.getCategoryId(), Entry.Type.EXPENSES, Entry.PayMethod.CARD, 20.0f, new Date(), "Sabrosura", "imagen");
+    protected Entry entryWithBaseCategory = new Entry(1, BaseCategory.getCategoryId(), Entry.Type.REVENUE, Entry.PayMethod.CASH, 15.0f, "14/06/2026", "Sabrosura", "imagen");
+    protected Entry entryWithChildCategory = new Entry(2, ChildCategory.getCategoryId(), Entry.Type.EXPENSES, Entry.PayMethod.CARD, 20.0f, "14/06/2026", "Sabrosura", "imagen");
     //endregion
 
     protected final DataBaseManager manager = new DataBaseManager(pathToCategoryDb, pathToEntryDb);
