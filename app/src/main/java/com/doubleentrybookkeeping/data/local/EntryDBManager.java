@@ -12,9 +12,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -175,16 +173,19 @@ public class EntryDBManager {
         return foundEntries.toArray(new Entry[0]);
     }
 
+    // Todo: REMOVE Temporary fix to missing Entry values
     private Entry toEntry(String[] values) {
         return new Entry(
-                Integer.parseInt(values[0]),
-                Integer.parseInt(values[1]),
-                Entry.Type.valueOf(values[2]),
-                Entry.PayMethod.valueOf(values[3]),
-                Float.parseFloat(values[4]),
-                values[5],
-                values[6],
-                values[7]
+            Integer.parseInt(values[0]),
+            Integer.parseInt(values[1]),
+            Entry.Type.valueOf(values[2]),
+            Entry.PayMethod.valueOf(values[3]),
+            Float.parseFloat(values[4]),
+            // Change start
+            values.length >= 6 ? values[5] : null,
+            values.length >= 7 ? values[6] : null,
+            values.length >= 8 ? values[7] : null
+            // Change end
         );
     }
 }

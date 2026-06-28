@@ -1,7 +1,5 @@
 package com.doubleentrybookkeeping.data.local;
 
-import androidx.annotation.NonNull;
-
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.Category;
 
@@ -45,6 +43,7 @@ public class CategoryDbManager {
         return dbFile.getPath();
     }
 
+    // Todo: REMOVE Duplicate code from the ADD, MODIFY and REMOVE functions
     public void addCategory(Category category) throws IOException {
         addCategoryValidation(category);
         BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath(), true));
