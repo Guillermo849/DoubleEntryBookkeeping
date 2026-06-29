@@ -25,12 +25,13 @@ public class CategoryDbManager {
         checkDataBaseFileExists();
     }
 
-    public void checkDataBasePathIsEmpty(String pathToDb){
+    // Todo: Modify name, not very clear
+    private void checkDataBasePathIsEmpty(String pathToDb){
         if (pathToDb.isEmpty())
             throw new NullPointerException(EnumErrors.DataBase.PATH_EMPTY.message);
     }
 
-    public void checkDataBaseFileExists() throws FileNotFoundException {
+    private void checkDataBaseFileExists() throws FileNotFoundException {
         if (!categoryDbExists())
             throw new FileNotFoundException(EnumErrors.DataBase.FILE_NOT_EXISTS.message);
     }
@@ -52,7 +53,7 @@ public class CategoryDbManager {
         bw.close();
     }
 
-    public void addCategoryValidation(Category category) throws IOException {
+    private void addCategoryValidation(Category category) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(getDbPath()));
         String line = br.readLine();
 
@@ -70,29 +71,18 @@ public class CategoryDbManager {
     }
 
     public void modifyCategory(Category category) throws IOException {
-        HashSet<String> newDbInformation = new HashSet<>();
-
-        try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
-            boolean modified = false;
-
-            String line;
-            newDbInformation.add(br.readLine());
-            while ((line = br.readLine()) != null) {
-                String[] columnValues = line.split(",");
-
-                int dbCategoryId = Integer.parseInt(columnValues[0]);
-                if (dbCategoryId == category.getCategoryId()) {
-                    modified = true;
-                    newDbInformation.add(toCsvFormat(category));
-                }
+        DataBaseManipulation<Integer, Category, HashSet<String>, Boolean> modify = (dbCategoryId,
+                                                                                    modifiedCategory,
+                                                                                    newDbInformation,
+                                                                                    modified) -> {
+            if (dbCategoryId == modifiedCategory.getCategoryId()) {
+                modified = true;
+                newDbInformation.add(toCsvFormat(modifiedCategory));
             }
-            br.close();
+            return modified;
+        };
 
-            if (modified)
-                writeToCSV(newDbInformation);
-        } catch (IOException ex) {
-            throw new IOException(ex.getMessage());
-        }
+        dataBaseManipulation(modify, category);
     }
 
     public void deleteCategory(int categoryId) throws IOException {
@@ -117,6 +107,31 @@ public class CategoryDbManager {
             br.close();
 
             writeToCSV(newDbInformation);
+        } catch (IOException ex) {
+            throw new IOException(ex.getMessage());
+        }
+    }
+
+    private void dataBaseManipulation(DataBaseManipulation<Integer, Category, HashSet<String>, Boolean> filterAction, Category category) throws IOException {
+        HashSet<String> newDbInformation = new HashSet<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
+            boolean modified = false;
+
+            String line;
+            newDbInformation.add(br.readLine());
+            while ((line = br.readLine()) != null) {
+                String[] columnValues = line.split(",");
+
+                int dbCategoryId = Integer.parseInt(columnValues[0]);
+                int dbBaseCategoryId = Integer.parseInt(columnValues[2]);
+
+                modified = filterAction.run(dbCategoryId, category, newDbInformation, modified);
+            }
+            br.close();
+
+            if (modified)
+                writeToCSV(newDbInformation);
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }
@@ -158,5 +173,11 @@ public class CategoryDbManager {
                 Integer.parseInt(columnValues[0]),
                 Integer.parseInt(columnValues[2]),
                 columnValues[1]);
+    }
+
+    // Todo: Think of a better name
+    @FunctionalInterface
+    interface DataBaseManipulation<I, S, H, B> {
+        public boolean run(I i, S s, H h, B b);
     }
 }
