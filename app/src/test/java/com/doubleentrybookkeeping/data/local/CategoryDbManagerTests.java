@@ -68,7 +68,7 @@ public class CategoryDbManagerTests extends TestBase{
         Assert.assertEquals(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "base_category", exception.getMessage());
 
         // Test Clean Up
-        categoryDbManager.deleteCategory(3);
+        categoryDbManager.deleteCategory(new Category(3, 0, "Invalid Category"));
     }
 
     @Test
@@ -96,7 +96,7 @@ public class CategoryDbManagerTests extends TestBase{
         Assert.assertNotNull(categoryDbManager.getCategoryById(BaseCategory.getCategoryId()));
 
         // Act
-        categoryDbManager.deleteCategory(1);
+        categoryDbManager.deleteCategory(BaseCategory);
 
         // Assert
         Assert.assertNull(categoryDbManager.getCategoryById(BaseCategory.getCategoryId()));
@@ -105,13 +105,13 @@ public class CategoryDbManagerTests extends TestBase{
     }
 
     @Test
-    public void delete_base_category_sets_child_categories_base_category_column_to_0() throws IOException {
+    public void delete_base_category_removes_child_categories_from_database_is_ok() throws IOException {
         // Arrange
         testStartUp();
         Assert.assertEquals(1, categoryDbManager.getCategoryById(ChildCategory.getCategoryId()).getBaseCategoryId());
 
         // Act
-        categoryDbManager.deleteCategory(BaseCategory.getCategoryId());
+        categoryDbManager.deleteCategory(BaseCategory);
 
         // Assert
         Assert.assertNull(categoryDbManager.getCategoryById(ChildCategory.getCategoryId()));

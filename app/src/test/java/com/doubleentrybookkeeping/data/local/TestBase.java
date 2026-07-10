@@ -39,8 +39,8 @@ public class TestBase {
     }
 
     protected void testCleanUp() throws IOException {
-        manager.getCategoryManager().deleteCategory(BaseCategory.getCategoryId());
-        manager.getCategoryManager().deleteCategory(ChildCategory.getCategoryId());
+        manager.getCategoryManager().deleteCategory(BaseCategory);
+        manager.getCategoryManager().deleteCategory(ChildCategory);
 
         manager.getEntryManager().deleteDbObject(entryWithBaseCategory);
         manager.getEntryManager().deleteDbObject(entryWithChildCategory);

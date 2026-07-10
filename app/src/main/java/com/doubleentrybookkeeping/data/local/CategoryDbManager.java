@@ -19,14 +19,13 @@ public class CategoryDbManager {
 
     private final File dbFile;
     public CategoryDbManager(String pathToDb) throws FileNotFoundException {
-        checkDataBasePathIsEmpty(pathToDb);
+        checkDataBasePathIsNotEmpty(pathToDb);
 
         dbFile = new File(pathToDb);
         checkDataBaseFileExists();
     }
 
-    // Todo: Modify name, not very clear
-    private void checkDataBasePathIsEmpty(String pathToDb){
+    private void checkDataBasePathIsNotEmpty(String pathToDb){
         if (pathToDb.isEmpty())
             throw new NullPointerException(EnumErrors.DataBase.PATH_EMPTY.message);
     }
@@ -44,7 +43,6 @@ public class CategoryDbManager {
         return dbFile.getPath();
     }
 
-    // Todo: REMOVE Duplicate code from the ADD, MODIFY and REMOVE functions
     public void addCategory(Category category) throws IOException {
         addCategoryValidation(category);
         BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath(), true));
@@ -71,48 +69,44 @@ public class CategoryDbManager {
     }
 
     public void modifyCategory(Category category) throws IOException {
-        DataBaseManipulation<Integer, Category, HashSet<String>, Boolean> modify = (dbCategoryId,
-                                                                                    modifiedCategory,
-                                                                                    newDbInformation,
-                                                                                    modified) -> {
-            if (dbCategoryId == modifiedCategory.getCategoryId()) {
-                modified = true;
-                newDbInformation.add(toCsvFormat(modifiedCategory));
+        dataBaseActionToProcess<Category, String[], Boolean, HashSet<String>> modify = (categoryGiven,
+                                                                                        columnValuesToMatch,
+                                                                                        categoryHasBeenModified,
+                                                                                        newInformationToInsertInDatabase) -> {
+            int dbCategoryId = Integer.parseInt(columnValuesToMatch[0]);
+
+            if (dbCategoryId == categoryGiven.getCategoryId()) {
+                categoryHasBeenModified = true;
+                newInformationToInsertInDatabase.add(toCsvFormat(categoryGiven));
             }
-            return modified;
+            return categoryHasBeenModified;
         };
 
-        dataBaseManipulation(modify, category);
+        dataBaseReaderTo(modify, category);
     }
 
-    public void deleteCategory(int categoryId) throws IOException {
-        HashSet<String> newDbInformation = new HashSet<>();
+    public void deleteCategory(Category category) throws IOException {
+        dataBaseActionToProcess<Category, String[], Boolean, HashSet<String>> delete = (categoryToDelete,
+                                                                                        columnValuesToMatch,
+                                                                                        categoryHasBeenDeleted,
+                                                                                        newInformationToInsertInDatabase) -> {
+            try{
+                int dbCategoryId = Integer.parseInt(columnValuesToMatch[0]);
+                int dbBaseCategoryId = Integer.parseInt(columnValuesToMatch[2]);
 
-        try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
-            String line;
-            newDbInformation.add(br.readLine());
+                if (dbCategoryId != category.getCategoryId() && dbBaseCategoryId != category.getCategoryId())
+                    newInformationToInsertInDatabase.add(columnValuesToMatch[0] + "," + columnValuesToMatch[1] + "," + columnValuesToMatch[2]);
+                else
+                    categoryHasBeenDeleted = true;
 
-            while ((line = br.readLine()) != null) {
-                String[] columnValues = line.split(",");
+            } catch (NumberFormatException ignored) {}
+            return categoryHasBeenDeleted;
+        };
 
-                try{
-                    int dbCategoryId = Integer.parseInt(columnValues[0]);
-                    int dbBaseCategoryId = Integer.parseInt(columnValues[2]);
-
-                    if (dbCategoryId != categoryId && dbBaseCategoryId != categoryId)
-                        newDbInformation.add(line);
-
-                } catch (NumberFormatException ignored) {}
-            }
-            br.close();
-
-            writeToCSV(newDbInformation);
-        } catch (IOException ex) {
-            throw new IOException(ex.getMessage());
-        }
+        dataBaseReaderTo(delete, category);
     }
 
-    private void dataBaseManipulation(DataBaseManipulation<Integer, Category, HashSet<String>, Boolean> filterAction, Category category) throws IOException {
+    private void dataBaseReaderTo(dataBaseActionToProcess<Category, String[], Boolean, HashSet<String>> action, Category category) throws IOException {
         HashSet<String> newDbInformation = new HashSet<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
@@ -123,10 +117,7 @@ public class CategoryDbManager {
             while ((line = br.readLine()) != null) {
                 String[] columnValues = line.split(",");
 
-                int dbCategoryId = Integer.parseInt(columnValues[0]);
-                int dbBaseCategoryId = Integer.parseInt(columnValues[2]);
-
-                modified = filterAction.run(dbCategoryId, category, newDbInformation, modified);
+                modified = action.run(category, columnValues, modified, newDbInformation);
             }
             br.close();
 
@@ -175,9 +166,8 @@ public class CategoryDbManager {
                 columnValues[1]);
     }
 
-    // Todo: Think of a better name
     @FunctionalInterface
-    interface DataBaseManipulation<I, S, H, B> {
-        public boolean run(I i, S s, H h, B b);
+    interface dataBaseActionToProcess<O, S, B, H> {
+        boolean run(O o, S s, B b, H h);
     }
 }
