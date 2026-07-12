@@ -11,7 +11,6 @@ public class TestBase {
 
     //region Categories
     protected final String pathToCategoryDb = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\CategoryDB.csv";
-    protected final CategoryDbManager categoryDbManager = new CategoryDbManager(pathToCategoryDb);
 
     protected final Category BaseCategory = new Category(1, 0, "BaseCategory");
     protected final Category ChildCategory = new Category(2, 1, "ChildCategory");
@@ -19,7 +18,6 @@ public class TestBase {
 
     //region Entries
     protected final String pathToEntryDb = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\EntriesDB.csv";
-    protected final EntryDBManager entryDbManager = new EntryDBManager(pathToEntryDb);
 
     protected Entry entryWithBaseCategory = new Entry(1, BaseCategory.getCategoryId(), Entry.Type.REVENUE, Entry.PayMethod.CASH, 15.0f, "14/06/2026", "Sabrosura", "imagen");
     protected Entry entryWithChildCategory = new Entry(2, ChildCategory.getCategoryId(), Entry.Type.EXPENSES, Entry.PayMethod.CARD, 20.0f, "14/06/2026", "Sabrosura", "imagen");

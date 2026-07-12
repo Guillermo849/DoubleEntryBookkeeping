@@ -20,7 +20,7 @@ public class EntryDBManagerTests extends TestBase{
     public void test_addDbObject_returns_entry() {
         Category category = new Category(1, 0, "Supermercado");
         Entry entry = new Entry(1, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 15.0f);
-        DbObject returnedObject = entryDbManager.addDbObject(entry);
+        DbObject returnedObject = manager.getEntryManager().addDbObject(entry);
         assertEquals(entry, returnedObject);
     }
 
@@ -28,7 +28,7 @@ public class EntryDBManagerTests extends TestBase{
     public void test_modifyDbObject_returns_entry() {
         Category category = new Category(1, "Supermercado");
         Entry entry = new Entry(2, 1, Entry.Type.REVENUE, Entry.PayMethod.CASH, 15.0f, "14/06/2026", "Sabrosura", "imagen");
-        DbObject returnedObject = entryDbManager.modifyDbObject(entry);
+        DbObject returnedObject = manager.getEntryManager().modifyDbObject(entry);
         assertEquals(entry, returnedObject);
     }
 
@@ -36,14 +36,14 @@ public class EntryDBManagerTests extends TestBase{
     public void test_deleteDbObject_does_not_throw() {
         Category category = new Category(1, "Supermercado");
         Entry entry = new Entry(3, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 15.0f);
-        entryDbManager.deleteDbObject(entry);
+        manager.getEntryManager().deleteDbObject(entry);
     }
 
     // TODO: Fix Tests
     @Test
     public void return_entry_with_given_category() throws FileNotFoundException {
         // Act
-        var filteredEntries = entryDbManager.FilterByCategoryID(3);
+        var filteredEntries = manager.getEntryManager().FilterByCategoryID(3);
         Entry entry = new Entry(2, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 15.0f);
         // Assert
         assertEquals(1, filteredEntries.length);
@@ -57,7 +57,7 @@ public class EntryDBManagerTests extends TestBase{
         manager.getEntryManager().addDbObject(entry);
 
         // Act
-        var filteredEntries = entryDbManager.FilterByDate(entry.getDate());
+        var filteredEntries = manager.getEntryManager().FilterByDate(entry.getDate());
 
         // Assert
         assertEquals(1, filteredEntries.length);

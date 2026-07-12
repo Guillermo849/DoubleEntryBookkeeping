@@ -22,13 +22,13 @@ public class CategoryDbManagerTests extends TestBase{
 
     @Test
     public void check_that_CategoryDbManager_extends_from_DataBaseManagerTest() {
-        Assert.assertEquals(pathToCategoryDb, categoryDbManager.getDbPath());
-        Assert.assertTrue(categoryDbManager.categoryDbExists());
+        Assert.assertEquals(pathToCategoryDb, manager.getCategoryManager().getDbPath());
+        Assert.assertTrue(manager.getCategoryManager().categoryDbExists());
     }
 
     @Test
     public void add_Category_Is_OK() throws IOException {
-        categoryDbManager.addCategory(new Category(15, 15, "quince"));
+        manager.getCategoryManager().addCategory(new Category(15, 15, "quince"));
     }
 
     @Test
@@ -37,7 +37,7 @@ public class CategoryDbManagerTests extends TestBase{
         testStartUp();
 
         // Act
-        var category = categoryDbManager.getCategoryById(BaseCategory.getCategoryId());
+        var category = manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId());
 
         // Assert
         Assert.assertEquals(BaseCategory.getCategoryId(), category.getCategoryId());
@@ -50,7 +50,7 @@ public class CategoryDbManagerTests extends TestBase{
     @Test
     public void get_category_from_db_not_found() throws IOException {
         // Act
-        var category = categoryDbManager.getCategoryById(321);
+        var category = manager.getCategoryManager().getCategoryById(321);
 
         // Assert
         Assert.assertNull(category);
@@ -62,13 +62,13 @@ public class CategoryDbManagerTests extends TestBase{
         addInvalidCategoryToDb(3, "asdf", "Invalid Category");
 
         // Act
-        Exception exception = assertThrows(NumberFormatException.class, () -> categoryDbManager.getCategoryById(2));
+        Exception exception = assertThrows(NumberFormatException.class, () -> manager.getCategoryManager().getCategoryById(2));
 
         // Assert
         Assert.assertEquals(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "base_category", exception.getMessage());
 
         // Test Clean Up
-        categoryDbManager.deleteCategory(new Category(3, 0, "Invalid Category"));
+        manager.getCategoryManager().deleteCategory(new Category(3, 0, "Invalid Category"));
     }
 
     @Test
@@ -79,10 +79,11 @@ public class CategoryDbManagerTests extends TestBase{
         newCategory.setCategoryName("NewNameForCategory");
 
         // Act
-        categoryDbManager.modifyCategory(newCategory);
+        manager.getCategoryManager().modifyCategory(newCategory);
 
         // Assert
-        var modifiedCategory = categoryDbManager.getCategoryById(BaseCategory.getCategoryId());
+        var modifiedCategory = manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId());
+
         Assert.assertNotEquals(BaseCategory.getCategoryName(), modifiedCategory.getCategoryName());
         Assert.assertEquals(BaseCategory.getCategoryId(), modifiedCategory.getCategoryId());
 
@@ -93,13 +94,13 @@ public class CategoryDbManagerTests extends TestBase{
     public void delete_category_is_ok() throws IOException {
         // Arrange
         testStartUp();
-        Assert.assertNotNull(categoryDbManager.getCategoryById(BaseCategory.getCategoryId()));
+        Assert.assertNotNull(manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId()));
 
         // Act
-        categoryDbManager.deleteCategory(BaseCategory);
+        manager.getCategoryManager().deleteCategory(BaseCategory);
 
         // Assert
-        Assert.assertNull(categoryDbManager.getCategoryById(BaseCategory.getCategoryId()));
+        Assert.assertNull(manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId()));
 
         testCleanUp();
     }
@@ -108,19 +109,19 @@ public class CategoryDbManagerTests extends TestBase{
     public void delete_base_category_removes_child_categories_from_database_is_ok() throws IOException {
         // Arrange
         testStartUp();
-        Assert.assertEquals(1, categoryDbManager.getCategoryById(ChildCategory.getCategoryId()).getBaseCategoryId());
+        Assert.assertEquals(1, manager.getCategoryManager().getCategoryById(ChildCategory.getCategoryId()).getBaseCategoryId());
 
         // Act
-        categoryDbManager.deleteCategory(BaseCategory);
+        manager.getCategoryManager().deleteCategory(BaseCategory);
 
         // Assert
-        Assert.assertNull(categoryDbManager.getCategoryById(ChildCategory.getCategoryId()));
+        Assert.assertNull(manager.getCategoryManager().getCategoryById(ChildCategory.getCategoryId()));
 
         testCleanUp();
     }
 
     private void addInvalidCategoryToDb(Object id, Object baseCategoryId, Object name) throws IOException {
-        BufferedWriter bw = new BufferedWriter(new FileWriter(categoryDbManager.getDbPath(), true));
+        BufferedWriter bw = new BufferedWriter(new FileWriter(manager.getCategoryManager().getDbPath(), true));
         bw.write(id + "," + name + "," + baseCategoryId);
         bw.newLine();
         bw.close();
