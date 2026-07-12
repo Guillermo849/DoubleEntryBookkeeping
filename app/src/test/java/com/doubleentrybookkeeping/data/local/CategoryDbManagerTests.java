@@ -1,5 +1,6 @@
 package com.doubleentrybookkeeping.data.local;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
@@ -103,6 +104,18 @@ public class CategoryDbManagerTests extends TestBase{
         Assert.assertNull(manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId()));
 
         testCleanUp();
+    }
+
+    @Test
+    public void delete_invalid_category_is_ok() throws IOException {
+        // Arrange
+        addInvalidCategoryToDb(3, "asdf", "Invalid Category");
+
+        // Act
+        manager.getCategoryManager().deleteCategory(new Category(3, 0, "Invalid Category"));
+
+        // Assert
+        assertNull(manager.getCategoryManager().getCategoryById(3));
     }
 
     @Test

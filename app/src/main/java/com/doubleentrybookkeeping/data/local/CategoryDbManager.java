@@ -99,7 +99,9 @@ public class CategoryDbManager {
                 else
                     categoryHasBeenDeleted = true;
 
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException invalidData) {
+                categoryHasBeenDeleted = true;
+            }
             return categoryHasBeenDeleted;
         };
 
