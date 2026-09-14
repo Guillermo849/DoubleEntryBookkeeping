@@ -16,15 +16,20 @@ import java.io.IOException;
 
 public class CategoryDbManagerTests extends TestBase{
 
-
-
     public CategoryDbManagerTests() throws FileNotFoundException {
     }
 
     @Test
-    public void check_that_CategoryDbManager_extends_from_DataBaseManagerTest() {
-        Assert.assertEquals(pathToCategoryDb, manager.getCategoryManager().getDbPath());
-        Assert.assertTrue(manager.getCategoryManager().categoryDbExists());
+    public void create_new_category_manager_is_ok() {
+        try {
+            // Act
+            var categoryManager = new CategoryDbManager(pathToCategoryDb);
+
+            // Assert
+            Assert.assertEquals(pathToCategoryDb, categoryManager.getDbPath());
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("No exceptions should have been thrown");
+        }
     }
 
     @Test
@@ -38,12 +43,12 @@ public class CategoryDbManagerTests extends TestBase{
         testStartUp();
 
         // Act
-        var category = manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId());
+        var fetchedCategory = manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId());
 
         // Assert
-        Assert.assertEquals(BaseCategory.getCategoryId(), category.getCategoryId());
-        Assert.assertEquals(BaseCategory.getBaseCategoryId(), category.getBaseCategoryId());
-        Assert.assertEquals(BaseCategory.getCategoryName(), category.getCategoryName());
+        Assert.assertEquals(BaseCategory.getCategoryId(), fetchedCategory.getCategoryId());
+        Assert.assertEquals(BaseCategory.getBaseCategoryId(), fetchedCategory.getBaseCategoryId());
+        Assert.assertEquals(BaseCategory.getCategoryName(), fetchedCategory.getCategoryName());
 
         testCleanUp();
     }
@@ -51,10 +56,10 @@ public class CategoryDbManagerTests extends TestBase{
     @Test
     public void get_category_from_db_not_found() throws IOException {
         // Act
-        var category = manager.getCategoryManager().getCategoryById(321);
+        var nonExistentCategory = manager.getCategoryManager().getCategoryById(321);
 
         // Assert
-        Assert.assertNull(category);
+        Assert.assertNull(nonExistentCategory);
     }
 
     @Test
@@ -76,11 +81,10 @@ public class CategoryDbManagerTests extends TestBase{
     public void modify_category_is_ok() throws IOException {
         // Arrange
         testStartUp();
-        var newCategory = new Category(BaseCategory.getCategoryId(), BaseCategory.getCategoryName());
-        newCategory.setCategoryName("NewNameForCategory");
+        var newCategoryValues = new Category(BaseCategory.getCategoryId(), "NewNameForCategory");
 
         // Act
-        manager.getCategoryManager().modifyCategory(newCategory);
+        manager.getCategoryManager().modifyCategory(newCategoryValues);
 
         // Assert
         var modifiedCategory = manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId());

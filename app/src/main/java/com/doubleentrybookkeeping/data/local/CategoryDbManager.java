@@ -35,7 +35,7 @@ public class CategoryDbManager {
             throw new FileNotFoundException(EnumErrors.DataBase.FILE_NOT_EXISTS.message);
     }
 
-    public boolean categoryDbExists() {
+    private boolean categoryDbExists() {
         return dbFile.exists();
     }
 
