@@ -3,19 +3,15 @@ package com.doubleentrybookkeeping.data.local;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.doubleentrybookkeeping.domain.models.Category;
 import com.doubleentrybookkeeping.domain.models.DbObject;
 import com.doubleentrybookkeeping.domain.models.Entry;
 
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
-import java.util.Date;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
@@ -24,7 +20,6 @@ public class EntryDBManagerTests extends TestBase{
 
     public EntryDBManagerTests() throws FileNotFoundException {
     }
-    private final String pathToDb = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\EntriesManagerTestDB.csv";
 
     @Test
     public void test_addDbObject_adds_entry_to_file() throws IOException {
@@ -32,21 +27,21 @@ public class EntryDBManagerTests extends TestBase{
         Entry entry = new Entry(1, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 15.0f);
 
         // Act
-        DbObject returnedObject = entryDbManager.addDbObject(entry);
+        DbObject returnedObject = manager.getEntryManager().addDbObject(entry);
 
         // Assert
         assertEquals(entry, returnedObject);
-        List<String> lines = Files.readAllLines(new File(pathToDb).toPath());
+        List<String> lines = Files.readAllLines(new File(pathToEntryDb).toPath());
         assertTrue(lines.stream().anyMatch(line -> line.startsWith("1,1,EXPENSES,CARD,15.0")));
     }
 
     @Test
-    public void test_addDbObject_returns_same_entry_object() throws IOException {
+    public void test_addDbObject_returns_same_entry_object() {
         // Arrange
         Entry entry = new Entry(10, 2, Entry.Type.REVENUE, Entry.PayMethod.CASH, 99.99f);
 
         // Act
-        DbObject result = entryDbManager.addDbObject(entry);
+        DbObject result = manager.getEntryManager().addDbObject(entry);
 
         // Assert
         assertNotNull(result);
@@ -63,14 +58,14 @@ public class EntryDBManagerTests extends TestBase{
     public void test_addDbObject_does_not_alter_existing_entries() throws IOException {
         // Arrange
         Entry newEntry = new Entry(5, 3, Entry.Type.REVENUE, Entry.PayMethod.CASH, 50.0f);
-        List<String> linesBefore = Files.readAllLines(new File(pathToDb).toPath());
+        List<String> linesBefore = Files.readAllLines(new File(pathToEntryDb).toPath());
         int countBefore = linesBefore.size();
 
         // Act
-        entryDbManager.addDbObject(newEntry);
+        manager.getEntryManager().addDbObject(newEntry);
 
         // Assert
-        List<String> linesAfter = Files.readAllLines(new File(pathToDb).toPath());
+        List<String> linesAfter = Files.readAllLines(new File(pathToEntryDb).toPath());
         assertEquals(countBefore + 1, linesAfter.size());
         assertTrue(linesAfter.stream().anyMatch(line -> line.startsWith("2,1,REVENUE")));
         assertTrue(linesAfter.stream().anyMatch(line -> line.startsWith("3,1,EXPENSES")));
@@ -84,12 +79,12 @@ public class EntryDBManagerTests extends TestBase{
         Entry entry3 = new Entry(13, 3, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 30.0f);
 
         // Act
-        entryDbManager.addDbObject(entry1);
-        entryDbManager.addDbObject(entry2);
-        entryDbManager.addDbObject(entry3);
+        manager.getEntryManager().addDbObject(entry1);
+        manager.getEntryManager().addDbObject(entry2);
+        manager.getEntryManager().addDbObject(entry3);
 
         // Assert
-        List<String> lines = Files.readAllLines(new File(pathToDb).toPath());
+        List<String> lines = Files.readAllLines(new File(pathToEntryDb).toPath());
         assertTrue(lines.stream().anyMatch(line -> line.startsWith("11,")));
         assertTrue(lines.stream().anyMatch(line -> line.startsWith("12,")));
         assertTrue(lines.stream().anyMatch(line -> line.startsWith("13,")));
@@ -98,25 +93,25 @@ public class EntryDBManagerTests extends TestBase{
     @Test
     public void test_modifyDbObject_modifies_existing_entry() throws IOException {
         // Arrange
-        Entry entry = new Entry(2, 2, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 20.0f, new Date(0), "Modified", "new_image");
+        Entry entry = new Entry(2, 2, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 20.0f, "20260201", "Modified", "new_image");
 
         // Act
-        DbObject returnedObject = entryDbManager.modifyDbObject(entry);
+        DbObject returnedObject = manager.getEntryManager().modifyDbObject(entry);
 
         // Assert
         assertEquals(entry, returnedObject);
-        List<String> lines = Files.readAllLines(new File(pathToDb).toPath());
+        List<String> lines = Files.readAllLines(new File(pathToEntryDb).toPath());
         assertFalse(lines.stream().anyMatch(line -> line.contains("Sabrosura")));
         assertTrue(lines.stream().anyMatch(line -> line.startsWith("2,2,EXPENSES,CARD,20.0")));
     }
 
     @Test
-    public void test_modifyDbObject_returns_the_modified_entry() throws IOException {
+    public void test_modifyDbObject_returns_the_modified_entry() {
         // Arrange
         Entry updatedEntry = new Entry(2, 5, Entry.Type.REVENUE, Entry.PayMethod.CASH, 77.5f);
 
         // Act
-        DbObject result = entryDbManager.modifyDbObject(updatedEntry);
+        DbObject result = manager.getEntryManager().modifyDbObject(updatedEntry);
 
         // Assert
         assertNotNull(result);
@@ -132,14 +127,14 @@ public class EntryDBManagerTests extends TestBase{
     public void test_modifyDbObject_does_not_duplicate_entry() throws IOException {
         // Arrange
         Entry updatedEntry = new Entry(2, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 99.0f);
-        List<String> linesBefore = Files.readAllLines(new File(pathToDb).toPath());
+        List<String> linesBefore = Files.readAllLines(new File(pathToEntryDb).toPath());
         int countBefore = linesBefore.size();
 
         // Act
-        entryDbManager.modifyDbObject(updatedEntry);
+        manager.getEntryManager().modifyDbObject(updatedEntry);
 
         // Assert
-        List<String> linesAfter = Files.readAllLines(new File(pathToDb).toPath());
+        List<String> linesAfter = Files.readAllLines(new File(pathToEntryDb).toPath());
         assertEquals(countBefore, linesAfter.size());
         long count = linesAfter.stream().filter(line -> line.startsWith("2,")).count();
         assertEquals(1, count);
@@ -151,10 +146,10 @@ public class EntryDBManagerTests extends TestBase{
         Entry entry = new Entry(3, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 15.0f);
 
         // Act
-        entryDbManager.deleteDbObject(entry);
+        manager.getEntryManager().deleteDbObject(entry);
 
         // Assert
-        List<String> lines = Files.readAllLines(new File(pathToDb).toPath());
+        List<String> lines = Files.readAllLines(new File(pathToEntryDb).toPath());
         assertFalse(lines.stream().anyMatch(line -> line.startsWith("3,")));
     }
 
@@ -162,14 +157,14 @@ public class EntryDBManagerTests extends TestBase{
     public void test_deleteDbObject_reduces_line_from_file() throws IOException {
         // Arrange
         Entry entry = new Entry(2, 1, Entry.Type.REVENUE, Entry.PayMethod.CASH, 15.0f);
-        List<String> linesBefore = Files.readAllLines(new File(pathToDb).toPath());
+        List<String> linesBefore = Files.readAllLines(new File(pathToEntryDb).toPath());
         int countBefore = linesBefore.size();
 
         // Act
-        entryDbManager.deleteDbObject(entry);
+        manager.getEntryManager().deleteDbObject(entry);
 
         // Assert
-        List<String> linesAfter = Files.readAllLines(new File(pathToDb).toPath());
+        List<String> linesAfter = Files.readAllLines(new File(pathToEntryDb).toPath());
         assertEquals(countBefore - 1, linesAfter.size());
     }
 
@@ -177,23 +172,23 @@ public class EntryDBManagerTests extends TestBase{
     public void test_deleteDbObject_only_removes_exact_id_match() throws IOException {
         // Arrange
         Entry entry20 = new Entry(20, 1, Entry.Type.REVENUE, Entry.PayMethod.CASH, 50.0f);
-        entryDbManager.addDbObject(entry20);
+        manager.getEntryManager().addDbObject(entry20);
         Entry entryToDelete = new Entry(2, 1, Entry.Type.REVENUE, Entry.PayMethod.CASH, 15.0f);
 
         // Act
-        entryDbManager.deleteDbObject(entryToDelete);
+        manager.getEntryManager().deleteDbObject(entryToDelete);
 
         // Assert
-        List<String> lines = Files.readAllLines(new File(pathToDb).toPath());
+        List<String> lines = Files.readAllLines(new File(pathToEntryDb).toPath());
         assertFalse(lines.stream().anyMatch(line -> line.startsWith("2,")));
         assertTrue(lines.stream().anyMatch(line -> line.startsWith("20,")));
     }
 
     // TODO: Fix Tests
     @Test
-    public void return_entry_with_given_category() throws FileNotFoundException {
+    public void return_entry_with_given_category() {
         // Act
-        var filteredEntries = entryDbManager.FilterByCategoryID(3);
+        var filteredEntries = manager.getEntryManager().FilterByCategoryID(3);
         Entry entry = new Entry(1, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 15.0f);
         // Assert
         assertEquals(1, filteredEntries.length);
@@ -201,9 +196,9 @@ public class EntryDBManagerTests extends TestBase{
     }
 
     @Test
-    public void return_entry_with_given_date() throws FileNotFoundException {
+    public void return_entry_with_given_date() {
         // Act
-        var filteredEntries = entryDbManager.FilterByDate(new Date(Long.parseLong("20260201")));
+        var filteredEntries = manager.getEntryManager().FilterByDate("20260201");
         // Assert
         assertEquals(1, filteredEntries.length);
     }
