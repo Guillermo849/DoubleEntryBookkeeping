@@ -33,11 +33,6 @@ public class DataBaseManagerTests extends TestBase {
     }
 
     @Test
-    public void delete_category_cascade_is_ok() {
-
-    }
-
-    @Test
     public void import_data_base_to_file_is_ok() throws IOException {
         String categoryImportPath = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\CategoryDB.csv";
         String entriesImportPath = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\EntriesDB.csv";

@@ -49,6 +49,10 @@ public class Entry extends  DbObject{
         return category;
     }
 
+    public void setCategory(int categoryId) {
+        category = categoryId;
+    }
+
     public Type getType() {
         return type;
     }

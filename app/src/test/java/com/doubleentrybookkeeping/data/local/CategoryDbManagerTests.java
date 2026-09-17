@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.Category;
+import com.doubleentrybookkeeping.domain.models.Entry;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,11 +15,12 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class CategoryDbManagerTests extends TestBase{
+public class CategoryDbManagerTests extends TestBase {
 
     public CategoryDbManagerTests() throws FileNotFoundException {
     }
 
+    //Todo: fix assertion so it works for both Linux and windows file system.
     @Test
     public void create_new_category_manager_is_ok() {
         try {
@@ -135,6 +137,20 @@ public class CategoryDbManagerTests extends TestBase{
         Assert.assertNull(manager.getCategoryManager().getCategoryById(ChildCategory.getCategoryId()));
 
         testCleanUp();
+    }
+
+    @Test
+    public void delete_category_modifies_entries_category_to_0_is_ok() throws IOException {
+        // Arrange
+        testStartUp();
+        Assert.assertNotNull(manager.getEntryManager().FilterByCategoryID(ChildCategory.getCategoryId()));
+
+        // Act
+        manager.getCategoryManager().deleteCategory(ChildCategory);
+
+        // Assert
+        var entriesFromDeletedCategory = manager.getEntryManager().FilterByCategoryID(ChildCategory.getCategoryId());
+        Assert.assertEquals(0, entriesFromDeletedCategory.length);
     }
 
     private void addInvalidCategoryToDb(Object id, Object baseCategoryId, Object name) throws IOException {

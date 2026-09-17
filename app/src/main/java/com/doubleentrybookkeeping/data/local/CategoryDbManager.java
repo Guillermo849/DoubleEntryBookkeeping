@@ -15,7 +15,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+interface CategoryDeletedListener {
+    void deleted_category(int deletedCategory);
+}
+
 public class CategoryDbManager {
+
+    private List<CategoryDeletedListener> listeners = new ArrayList<>();
 
     private final File dbFile;
     public CategoryDbManager(String pathToDb) throws FileNotFoundException {
@@ -23,6 +29,10 @@ public class CategoryDbManager {
 
         dbFile = new File(pathToDb);
         checkDataBaseFileExists();
+    }
+
+    public void addListener(CategoryDeletedListener toAdd) {
+        listeners.add(toAdd);
     }
 
     private void checkDataBasePathIsNotEmpty(String pathToDb){
@@ -72,7 +82,8 @@ public class CategoryDbManager {
         dataBaseActionToProcess<Category, String[], Boolean, HashSet<String>> modify = (categoryGiven,
                                                                                         columnValuesToMatch,
                                                                                         categoryHasBeenModified,
-                                                                                        newInformationToInsertInDatabase) -> {
+                                                                                        newInformationToInsertInDatabase) ->
+        {
             int dbCategoryId = Integer.parseInt(columnValuesToMatch[0]);
 
             if (dbCategoryId == categoryGiven.getCategoryId()) {
@@ -86,18 +97,23 @@ public class CategoryDbManager {
     }
 
     public void deleteCategory(Category category) throws IOException {
+        HashSet<Category> deletedCategories = new HashSet<>();
+
         dataBaseActionToProcess<Category, String[], Boolean, HashSet<String>> delete = (categoryToDelete,
                                                                                         columnValuesToMatch,
                                                                                         categoryHasBeenDeleted,
-                                                                                        newInformationToInsertInDatabase) -> {
+                                                                                        newInformationToInsertInDatabase) ->
+        {
             try{
                 int dbCategoryId = Integer.parseInt(columnValuesToMatch[0]);
                 int dbBaseCategoryId = Integer.parseInt(columnValuesToMatch[2]);
 
                 if (dbCategoryId != category.getCategoryId() && dbBaseCategoryId != category.getCategoryId())
                     newInformationToInsertInDatabase.add(columnValuesToMatch[0] + "," + columnValuesToMatch[1] + "," + columnValuesToMatch[2]);
-                else
+                else {
                     categoryHasBeenDeleted = true;
+                    deletedCategories.add(categoryToDelete);
+                }
 
             } catch (NumberFormatException invalidData) {
                 categoryHasBeenDeleted = true;
@@ -106,6 +122,12 @@ public class CategoryDbManager {
         };
 
         dataBaseReaderTo(delete, category);
+
+        if (!deletedCategories.isEmpty()) {
+            for (var listener : listeners)
+                for (var deletedCategory : deletedCategories)
+                    listener.deleted_category(deletedCategory.getCategoryId());
+        }
     }
 
     private void dataBaseReaderTo(dataBaseActionToProcess<Category, String[], Boolean, HashSet<String>> action, Category category) throws IOException {

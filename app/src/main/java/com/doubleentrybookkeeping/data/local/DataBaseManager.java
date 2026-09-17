@@ -17,6 +17,8 @@ public class DataBaseManager {
     public DataBaseManager(String pathToCategoryDb, String pathToEntryDb) throws FileNotFoundException {
         categoryDbManager = new CategoryDbManager(pathToCategoryDb);
         entryDBManager = new EntryDBManager(pathToEntryDb);
+
+        categoryDbManager.addListener(entryDBManager);
     }
 
     public CategoryDbManager getCategoryManager() {
