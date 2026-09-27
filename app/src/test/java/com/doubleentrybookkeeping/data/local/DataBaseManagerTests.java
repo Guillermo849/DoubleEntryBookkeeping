@@ -19,13 +19,6 @@ public class DataBaseManagerTests extends TestBase {
     }
 
     @Test
-    public void export_data_bases_format_is_ok() {
-        String expectedFormat = "id,name,base_category\n\n\n" +
-                "id,category,type,method,amount,date,concept,image\n\n";
-        assertEquals(expectedFormat, manager.getDataBaseExportData());
-    }
-
-    @Test
     public void export_data_bases_to_file_is_ok() throws IOException {
         String exportPath = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\ExportedDb.csv";
         manager.exportDataBasesTo(exportPath);

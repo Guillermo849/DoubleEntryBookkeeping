@@ -12,7 +12,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -142,6 +145,22 @@ public class EntryDBManager implements CategoryDeletedListener {
 
     public Entry[] FilterByDate(String date) {
         return getEntriesByFiltrating(entry -> entry.getDate().equals(date));
+    }
+
+    public Entry[] FilterByDateInRange(String startDate, String endDate) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        Date start = sdf.parse(startDate);
+        Date end = sdf.parse(endDate);
+
+        return getEntriesByFiltrating(entry -> {
+            Date entryDate = null;
+            try {
+                entryDate = sdf.parse(entry.getDate());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+            return entryDate.after(start) && entryDate.before(end);
+        });
     }
 
     public Entry[] FilterByAmount(float amount) {
