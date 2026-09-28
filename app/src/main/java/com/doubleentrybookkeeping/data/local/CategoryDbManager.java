@@ -11,17 +11,22 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 interface CategoryDeletedListener {
     void deleted_category(int deletedCategory);
 }
 
+@FunctionalInterface
+interface dataBaseActionToProcess<O, S, B, H> {
+    boolean run(O o, S s, B b, H h);
+}
+
 public class CategoryDbManager {
 
-    private List<CategoryDeletedListener> listeners = new ArrayList<>();
+    private final List<CategoryDeletedListener> listeners = new ArrayList<>();
 
     private final File dbFile;
     public CategoryDbManager(String pathToDb) throws FileNotFoundException {
@@ -79,7 +84,7 @@ public class CategoryDbManager {
     }
 
     public void modifyCategory(Category category) throws IOException {
-        dataBaseActionToProcess<Category, String[], Boolean, HashSet<String>> modify = (categoryGiven,
+        dataBaseActionToProcess<Category, String[], Boolean, Set<String>> modify = (categoryGiven,
                                                                                         columnValuesToMatch,
                                                                                         categoryHasBeenModified,
                                                                                         newInformationToInsertInDatabase) ->
@@ -90,6 +95,9 @@ public class CategoryDbManager {
                 categoryHasBeenModified = true;
                 newInformationToInsertInDatabase.add(toCsvFormat(categoryGiven));
             }
+            else
+                newInformationToInsertInDatabase.add(columnValuesToMatch[0] + "," + columnValuesToMatch[1] + "," + columnValuesToMatch[2]);
+
             return categoryHasBeenModified;
         };
 
@@ -97,9 +105,9 @@ public class CategoryDbManager {
     }
 
     public void deleteCategory(Category category) throws IOException {
-        HashSet<Category> deletedCategories = new HashSet<>();
+        Set<Category> deletedCategories = new LinkedHashSet<>();
 
-        dataBaseActionToProcess<Category, String[], Boolean, HashSet<String>> delete = (categoryToDelete,
+        dataBaseActionToProcess<Category, String[], Boolean, Set<String>> delete = (categoryToDelete,
                                                                                         columnValuesToMatch,
                                                                                         categoryHasBeenDeleted,
                                                                                         newInformationToInsertInDatabase) ->
@@ -123,15 +131,14 @@ public class CategoryDbManager {
 
         dataBaseReaderTo(delete, category);
 
-        if (!deletedCategories.isEmpty()) {
+        if (!deletedCategories.isEmpty())
             for (var listener : listeners)
                 for (var deletedCategory : deletedCategories)
                     listener.deleted_category(deletedCategory.getCategoryId());
-        }
     }
 
-    private void dataBaseReaderTo(dataBaseActionToProcess<Category, String[], Boolean, HashSet<String>> action, Category category) throws IOException {
-        HashSet<String> newDbInformation = new HashSet<>();
+    private void dataBaseReaderTo(dataBaseActionToProcess<Category, String[], Boolean, Set<String>> action, Category category) throws IOException {
+        Set<String> newDbInformation = new LinkedHashSet<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
             boolean modified = false;
@@ -152,12 +159,10 @@ public class CategoryDbManager {
         }
     }
 
-    private void writeToCSV(HashSet<String> newDbInformation) throws IOException {
-        List<String> informationIterator = new ArrayList<>(newDbInformation);
-        Collections.reverse(informationIterator);
+    private void writeToCSV(Set<String> newDbInformation) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath()));
 
-        for (var newCategoryLine : informationIterator) {
+        for (var newCategoryLine : newDbInformation) {
             bw.write(newCategoryLine);
             bw.write("\n");
         }
@@ -188,10 +193,5 @@ public class CategoryDbManager {
                 Integer.parseInt(columnValues[0]),
                 Integer.parseInt(columnValues[2]),
                 columnValues[1]);
-    }
-
-    @FunctionalInterface
-    interface dataBaseActionToProcess<O, S, B, H> {
-        boolean run(O o, S s, B b, H h);
     }
 }

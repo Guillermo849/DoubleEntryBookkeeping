@@ -5,7 +5,6 @@ import static org.junit.Assert.assertThrows;
 
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.Category;
-import com.doubleentrybookkeeping.domain.models.Entry;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,7 +27,8 @@ public class CategoryDbManagerTests extends TestBase {
             var categoryManager = new CategoryDbManager(pathToCategoryDb);
 
             // Assert
-            Assert.assertEquals(pathToCategoryDb, categoryManager.getDbPath());
+            Assert.assertTrue(categoryManager.getDbPath().equals(pathToCategoryDb)
+                    || categoryManager.getDbPath().equals(pathToCategoryDb.replace('/', '\\')));
         } catch (FileNotFoundException e) {
             throw new RuntimeException("No exceptions should have been thrown");
         }
@@ -151,6 +151,8 @@ public class CategoryDbManagerTests extends TestBase {
         // Assert
         var entriesFromDeletedCategory = manager.getEntryManager().FilterByCategoryID(ChildCategory.getCategoryId());
         Assert.assertEquals(0, entriesFromDeletedCategory.length);
+
+        testCleanUp();
     }
 
     private void addInvalidCategoryToDb(Object id, Object baseCategoryId, Object name) throws IOException {
