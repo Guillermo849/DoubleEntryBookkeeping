@@ -19,11 +19,6 @@ interface CategoryDeletedListener {
     void deleted_category(int deletedCategory);
 }
 
-@FunctionalInterface
-interface dataBaseActionToProcess<O, S, B, H> {
-    boolean run(O o, S s, B b, H h);
-}
-
 public class CategoryDbManager {
 
     private final List<CategoryDeletedListener> listeners = new ArrayList<>();
@@ -84,10 +79,10 @@ public class CategoryDbManager {
     }
 
     public void modifyCategory(Category category) throws IOException {
-        dataBaseActionToProcess<Category, String[], Boolean, Set<String>> modify = (categoryGiven,
-                                                                                        columnValuesToMatch,
-                                                                                        categoryHasBeenModified,
-                                                                                        newInformationToInsertInDatabase) ->
+        DataBaseActionToProcess<Category, String[], Boolean, Set<String>> modify = (categoryGiven,
+                                                                                    columnValuesToMatch,
+                                                                                    categoryHasBeenModified,
+                                                                                    newInformationToInsertInDatabase) ->
         {
             int dbCategoryId = Integer.parseInt(columnValuesToMatch[0]);
 
@@ -101,16 +96,18 @@ public class CategoryDbManager {
             return categoryHasBeenModified;
         };
 
-        dataBaseReaderTo(modify, category);
+        if (!dataBaseReaderTo(modify, category))
+            throw new NullPointerException(
+                    String.format(EnumErrors.DataBase.DB_OBJECT_DOES_NOT_EXIST.message, "Category", category.getCategoryId()+"", "Category"));
     }
 
     public void deleteCategory(Category category) throws IOException {
         Set<Category> deletedCategories = new LinkedHashSet<>();
 
-        dataBaseActionToProcess<Category, String[], Boolean, Set<String>> delete = (categoryToDelete,
-                                                                                        columnValuesToMatch,
-                                                                                        categoryHasBeenDeleted,
-                                                                                        newInformationToInsertInDatabase) ->
+        DataBaseActionToProcess<Category, String[], Boolean, Set<String>> delete = (categoryToDelete,
+                                                                                    columnValuesToMatch,
+                                                                                    categoryHasBeenDeleted,
+                                                                                    newInformationToInsertInDatabase) ->
         {
             try{
                 int dbCategoryId = Integer.parseInt(columnValuesToMatch[0]);
@@ -137,11 +134,12 @@ public class CategoryDbManager {
                     listener.deleted_category(deletedCategory.getCategoryId());
     }
 
-    private void dataBaseReaderTo(dataBaseActionToProcess<Category, String[], Boolean, Set<String>> action, Category category) throws IOException {
+    private boolean dataBaseReaderTo(DataBaseActionToProcess<Category, String[], Boolean, Set<String>> action, Category category) throws IOException {
         Set<String> newDbInformation = new LinkedHashSet<>();
 
+        boolean modified;
         try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
-            boolean modified = false;
+            modified = false;
 
             String line;
             newDbInformation.add(br.readLine());
@@ -157,6 +155,8 @@ public class CategoryDbManager {
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }
+
+        return modified;
     }
 
     private void writeToCSV(Set<String> newDbInformation) throws IOException {
@@ -193,5 +193,10 @@ public class CategoryDbManager {
                 Integer.parseInt(columnValues[0]),
                 Integer.parseInt(columnValues[2]),
                 columnValues[1]);
+    }
+
+    @FunctionalInterface
+    interface DataBaseActionToProcess<O, S, B, H> {
+        boolean run(O o, S s, B b, H h);
     }
 }

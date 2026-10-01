@@ -19,7 +19,6 @@ public class CategoryDbManagerTests extends TestBase {
     public CategoryDbManagerTests() throws FileNotFoundException {
     }
 
-    //Todo: fix assertion so it works for both Linux and windows file system.
     @Test
     public void create_new_category_manager_is_ok() {
         try {
@@ -98,6 +97,18 @@ public class CategoryDbManagerTests extends TestBase {
     }
 
     @Test
+    public void modify_non_existent_category_throws_exception() throws IOException {
+        // Act
+        Exception exception = assertThrows(NullPointerException.class,
+                () -> manager.getCategoryManager().modifyCategory(new Category(999, "DoesNotExist")));
+
+        // Assert
+        Assert.assertEquals(
+                String.format(EnumErrors.DataBase.DB_OBJECT_DOES_NOT_EXIST.message, "Category", "999", "Category"),
+                exception.getMessage());
+    }
+
+    @Test
     public void delete_category_is_ok() throws IOException {
         // Arrange
         testStartUp();
@@ -153,6 +164,20 @@ public class CategoryDbManagerTests extends TestBase {
         Assert.assertEquals(0, entriesFromDeletedCategory.length);
 
         testCleanUp();
+    }
+
+    @Test
+    public void delete_non_existent_category_is_ok() throws Exception {
+        try {
+            // Act
+            var nonExistentCategory = manager.getCategoryManager().getCategoryById(999999);
+
+            // Assert
+            Assert.assertNull(nonExistentCategory);
+
+        } catch (Exception e) {
+            throw new Exception("No EXCEPTION should have been thrown.");
+        }
     }
 
     private void addInvalidCategoryToDb(Object id, Object baseCategoryId, Object name) throws IOException {

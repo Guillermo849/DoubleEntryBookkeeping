@@ -15,7 +15,8 @@ public class EnumErrors {
     public enum DataBase {
         PATH_EMPTY("DataBase path is empty."),
         FILE_NOT_EXISTS("File doesn't exists"),
-        INVALID_COLUMN_VALUE_TYPE("Value type is not valid for column: ");
+        INVALID_COLUMN_VALUE_TYPE("Value type is not valid for column: "),
+        DB_OBJECT_DOES_NOT_EXIST("The %s %s does not exist in the %s DataBase");
         public final String message;
 
         DataBase(String message) {
