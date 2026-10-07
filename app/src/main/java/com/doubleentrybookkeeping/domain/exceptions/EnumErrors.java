@@ -23,4 +23,10 @@ public class EnumErrors {
             this.message = message;
         }
     }
+
+    public enum CategoryDbManagerActions {
+        CATEGORY_EXISTS("Category already exists");
+        public final String message;
+        CategoryDbManagerActions(String message){this.message = message;}
+    }
 }
