@@ -37,10 +37,10 @@ public class CategoryDbManagerTests extends TestBase {
     @Test
     public void add_Category_Is_OK() throws IOException {
         // Act
-        categoryDbManager.addCategory(BaseCategory);
+        manager.getCategoryManager().addCategory(BaseCategory);
 
         // Assert
-        var category = categoryDbManager.getCategoryById(BaseCategory.getCategoryId());
+        var category = manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId());
         Assert.assertNotNull(category);
 
         testCleanUp();
@@ -49,10 +49,10 @@ public class CategoryDbManagerTests extends TestBase {
     @Test
     public void add_Category_Already_Exists_In_DataBase_Throws_Error() throws IOException{
         // Arrange
-        categoryDbManager.addCategory(BaseCategory);
+        manager.getCategoryManager().addCategory(BaseCategory);
 
         // Act
-        Exception exception = assertThrows(InvalidObjectException.class, () -> categoryDbManager.addCategory(BaseCategory));
+        Exception exception = assertThrows(InvalidObjectException.class, () -> manager.getCategoryManager().addCategory(BaseCategory));
 
         // Assert
         Assert.assertEquals(EnumErrors.CategoryDbManagerActions.CATEGORY_EXISTS.message, exception.getMessage());
