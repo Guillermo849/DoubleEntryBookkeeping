@@ -21,19 +21,16 @@ interface CategoryDeletedListener {
 }
 
 public class CategoryDbManager {
-
     private final List<CategoryDeletedListener> listeners = new ArrayList<>();
 
     private final File dbFile;
+
+    //region CATEGORY MANAGER CONSTRUCTOR
     public CategoryDbManager(String pathToDb) throws FileNotFoundException {
         checkDataBasePathIsNotEmpty(pathToDb);
 
         dbFile = new File(pathToDb);
         checkDataBaseFileExists();
-    }
-
-    public void addListener(CategoryDeletedListener toAdd) {
-        listeners.add(toAdd);
     }
 
     private void checkDataBasePathIsNotEmpty(String pathToDb){
@@ -42,18 +39,20 @@ public class CategoryDbManager {
     }
 
     private void checkDataBaseFileExists() throws FileNotFoundException {
-        if (!categoryDbExists())
+        if (!dbFile.exists())
             throw new FileNotFoundException(EnumErrors.DataBase.FILE_NOT_EXISTS.message);
     }
-
-    private boolean categoryDbExists() {
-        return dbFile.exists();
-    }
+    //endregion
 
     public String getDbPath() {
         return dbFile.getPath();
     }
 
+    public void addListener(CategoryDeletedListener toAdd) {
+        listeners.add(toAdd);
+    }
+
+    //region ADD, MODIFY, DELETE
     public void addCategory(Category category) throws IOException {
         if(getCategoryByName(category.getCategoryName()) != null){
             throw new InvalidObjectException(EnumErrors.CategoryDbManagerActions.CATEGORY_EXISTS.message);
@@ -62,23 +61,6 @@ public class CategoryDbManager {
         bw.write(toCsvFormat(category));
         bw.newLine();
         bw.close();
-    }
-
-    private void addCategoryValidation(Category category) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(getDbPath()));
-        String line = br.readLine();
-
-        while(line != null){
-            if(line.equals(category)){
-                throw new NullPointerException(EnumErrors.Models.CATEGORY_CREATION.message);
-            }
-            line = br.readLine();
-        }
-        br.close();
-    }
-
-    private String toCsvFormat(Category category) {
-        return category.getCategoryId() + "," + category.getCategoryName() + "," + category.getBaseCategoryId();
     }
 
     public void modifyCategory(Category category) throws IOException {
@@ -161,17 +143,9 @@ public class CategoryDbManager {
 
         return modified;
     }
+    //endregion
 
-    private void writeToCSV(Set<String> newDbInformation) throws IOException {
-        BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath()));
-
-        for (var newCategoryLine : newDbInformation) {
-            bw.write(newCategoryLine);
-            bw.write("\n");
-        }
-        bw.close();
-    }
-
+    //region GET CATEGORY
     public Category getCategoryById(int id) throws IOException {
         return getCategoryBy(id, null);
     }
@@ -179,6 +153,7 @@ public class CategoryDbManager {
     public  Category getCategoryByName(String name) throws IOException{
         return getCategoryBy(0, name);
     }
+
     private Category getCategoryBy(int id, String name) throws IOException{
         try (BufferedReader br = new BufferedReader(new FileReader((getDbPath())))) {
             String line;
@@ -208,6 +183,23 @@ public class CategoryDbManager {
                 Integer.parseInt(columnValues[2]),
                 columnValues[1]);
     }
+    //endregion
+
+    //region CSV METHODS
+    private String toCsvFormat(Category category) {
+        return category.getCategoryId() + "," + category.getCategoryName() + "," + category.getBaseCategoryId();
+    }
+
+    private void writeToCSV(Set<String> newDbInformation) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath()));
+
+        for (var newCategoryLine : newDbInformation) {
+            bw.write(newCategoryLine);
+            bw.write("\n");
+        }
+        bw.close();
+    }
+    //endregion
 
     @FunctionalInterface
     interface DataBaseActionToProcess<O, S, B, H> {
