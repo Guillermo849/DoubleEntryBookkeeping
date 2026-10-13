@@ -3,9 +3,7 @@ package com.doubleentrybookkeeping.data.local;
 import com.doubleentrybookkeeping.domain.models.Category;
 import com.doubleentrybookkeeping.domain.models.Entry;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
-import org.testng.annotations.BeforeTest;
 
 import java.io.File;
 import java.io.FileNotFoundException;
