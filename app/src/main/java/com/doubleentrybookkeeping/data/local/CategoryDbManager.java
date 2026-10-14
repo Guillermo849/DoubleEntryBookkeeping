@@ -2,6 +2,8 @@ package com.doubleentrybookkeeping.data.local;
 
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.Category;
+import com.doubleentrybookkeeping.interfaces.DataBaseActionToProcess;
+import com.doubleentrybookkeeping.interfaces.ICategoryDeletedListener;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,12 +18,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-interface CategoryDeletedListener {
-    void deleted_category(int deletedCategory);
-}
-
 public class CategoryDbManager {
-    private final List<CategoryDeletedListener> listeners = new ArrayList<>();
+    private final List<ICategoryDeletedListener> listeners = new ArrayList<>();
 
     private final File dbFile;
 
@@ -48,7 +46,7 @@ public class CategoryDbManager {
         return dbFile.getPath();
     }
 
-    public void addListener(CategoryDeletedListener toAdd) {
+    public void addListener(ICategoryDeletedListener toAdd) {
         listeners.add(toAdd);
     }
 
@@ -200,9 +198,4 @@ public class CategoryDbManager {
         bw.close();
     }
     //endregion
-
-    @FunctionalInterface
-    interface DataBaseActionToProcess<O, S, B, H> {
-        boolean run(O o, S s, B b, H h);
-    }
 }

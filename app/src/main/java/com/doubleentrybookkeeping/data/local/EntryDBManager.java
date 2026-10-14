@@ -3,6 +3,7 @@ package com.doubleentrybookkeeping.data.local;
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.DbObject;
 import com.doubleentrybookkeeping.domain.models.Entry;
+import com.doubleentrybookkeeping.interfaces.ICategoryDeletedListener;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class EntryDBManager implements CategoryDeletedListener {
+public class EntryDBManager implements ICategoryDeletedListener {
 
     private final File dbFile;
 
