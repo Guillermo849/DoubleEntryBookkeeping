@@ -1,6 +1,8 @@
 package com.doubleentrybookkeeping.data.local;
 
 
+import com.doubleentrybookkeeping.interfaces.data.local.ICategoryDbManager;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,7 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class DataBaseManager {
-    private final CategoryDbManager categoryDbManager;
+    private final ICategoryDbManager categoryDbManager;
 
     private final EntryDBManager entryDBManager;
 
@@ -21,7 +23,7 @@ public class DataBaseManager {
         categoryDbManager.addListener(entryDBManager);
     }
 
-    public CategoryDbManager getCategoryManager() {
+    public ICategoryDbManager getCategoryManager() {
         return categoryDbManager;
     }
 

@@ -4,6 +4,7 @@ import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.Category;
 import com.doubleentrybookkeeping.interfaces.DataBaseActionToProcess;
 import com.doubleentrybookkeeping.interfaces.ICategoryDeletedListener;
+import com.doubleentrybookkeeping.interfaces.data.local.ICategoryDbManager;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,7 +19,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class CategoryDbManager {
+public class CategoryDbManager implements ICategoryDbManager {
     private final List<ICategoryDeletedListener> listeners = new ArrayList<>();
 
     private final File dbFile;
@@ -42,15 +43,18 @@ public class CategoryDbManager {
     }
     //endregion
 
+    @Override
     public String getDbPath() {
         return dbFile.getPath();
     }
 
+    @Override
     public void addListener(ICategoryDeletedListener toAdd) {
         listeners.add(toAdd);
     }
 
     //region ADD, MODIFY, DELETE
+    @Override
     public void addCategory(Category category) throws IOException {
         if(getCategoryByName(category.getCategoryName()) != null){
             throw new InvalidObjectException(EnumErrors.CategoryDbManagerActions.CATEGORY_EXISTS.message);
@@ -61,6 +65,7 @@ public class CategoryDbManager {
         bw.close();
     }
 
+    @Override
     public void modifyCategory(Category category) throws IOException {
         DataBaseActionToProcess<Category, String[], Boolean, Set<String>> modify = (categoryGiven,
                                                                                     columnValuesToMatch,
@@ -84,6 +89,7 @@ public class CategoryDbManager {
                     String.format(EnumErrors.DataBase.DB_OBJECT_DOES_NOT_EXIST.message, "Category", category.getCategoryId()+"", "Category"));
     }
 
+    @Override
     public void deleteCategory(Category category) throws IOException {
         Set<Category> deletedCategories = new LinkedHashSet<>();
 
@@ -144,11 +150,13 @@ public class CategoryDbManager {
     //endregion
 
     //region GET CATEGORY
+    @Override
     public Category getCategoryById(int id) throws IOException {
         return getCategoryBy(id, null);
     }
 
-    public  Category getCategoryByName(String name) throws IOException{
+    @Override
+    public Category getCategoryByName(String name) throws IOException{
         return getCategoryBy(0, name);
     }
 
