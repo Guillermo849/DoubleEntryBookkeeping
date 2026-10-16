@@ -45,9 +45,9 @@ public class CategoryDbManager {
     }
 
     public void addCategory(Category category) throws IOException {
-        if(getCategoryByName(category.getCategoryName()) != null){
+        if(getCategoryById(category.getCategoryId()) != null)
             throw new InvalidObjectException(EnumErrors.CategoryDbManagerActions.CATEGORY_EXISTS.message);
-        }
+
         BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath(), true));
         bw.write(toCsvFormat(category));
         bw.newLine();
