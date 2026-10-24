@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.ParseException;
 import java.util.List;
 
 public class EntryDBManagerTests extends TestBase{
@@ -196,11 +197,29 @@ public class EntryDBManagerTests extends TestBase{
     }
 
     @Test
-    public void return_entry_with_given_date() {
+    public void return_entry_with_given_date() throws IOException {
+        //Arrange
+        testStartUp();
+
         // Act
-        var filteredEntries = manager.getEntryManager().FilterByDate("20260201");
+        var filteredEntries = manager.getEntryManager().FilterByDate("14/06/2026");
         // Assert
         assertEquals(1, filteredEntries.length);
+        testCleanUp();
+    }
+
+    @Test
+    public void return_entry_with_given_date_in_range() throws IOException, ParseException {
+        //Arrange
+        testStartUp();
+
+        // Act
+        var filteredEntries = manager.getEntryManager().FilterByDateInRange("13/06/2026", "17/06/2026");
+        // Assert
+        assertEquals(2, filteredEntries.length);
+        assertEquals(entryWithBaseCategory.getDate(), filteredEntries[0].getDate());
+        assertEquals(entryWithChildCategory.getDate(), filteredEntries[1].getDate());
+        testCleanUp();
     }
 
 }

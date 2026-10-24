@@ -33,7 +33,9 @@ public class DataBaseManager {
 
     public void exportDataBasesTo(String pathToExportFile) throws IOException {
         File exportFile = new File(pathToExportFile);
-        exportFile.createNewFile();
+        if (!exportFile.exists()){
+            exportFile.createNewFile();
+        }
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(pathToExportFile, false));
         bw.write(getDataBaseExportData());
@@ -41,7 +43,7 @@ public class DataBaseManager {
         bw.close();
     }
 
-    public String getDataBaseExportData() {
+    private String getDataBaseExportData() {
         StringBuilder exportDbDataBuilder = new StringBuilder();
 
         getDataFromDb(exportDbDataBuilder, categoryDbManager.getDbPath());
