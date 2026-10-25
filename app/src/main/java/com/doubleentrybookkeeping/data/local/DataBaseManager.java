@@ -1,6 +1,8 @@
 package com.doubleentrybookkeeping.data.local;
 
 
+import androidx.annotation.NonNull;
+
 import com.doubleentrybookkeeping.domain.models.Category;
 import com.doubleentrybookkeeping.domain.models.Entry;
 import com.doubleentrybookkeeping.interfaces.data.local.ICategoryDbManager;
@@ -14,6 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 
 public class DataBaseManager {
@@ -87,7 +90,7 @@ public class DataBaseManager {
         entriesbw.close();
     }
 
-    private String[] getDataBaseImportData(String pathOfImportFile) throws IOException {
+    private String[] getDataBaseImportData(String pathOfImportFile) {
         StringBuilder[] exportDbDataBuilder = new StringBuilder[2];
         exportDbDataBuilder[0] = new StringBuilder();
         exportDbDataBuilder[1] = new StringBuilder();
@@ -121,29 +124,55 @@ public class DataBaseManager {
     }
 
     // Todo: Remove throws ParseException
-    public EntriesCategories getThisMonthsExpenses() throws ParseException, IOException {
+    public EntriesCategories getMonthYearExpenses() throws ParseException, IOException {
         Calendar cal = Calendar.getInstance();
         String startOfTheMonth = String.format("1/0%s/%s", cal.get(Calendar.MONTH)+1, cal.get(Calendar.YEAR));
         String endOfMonth = String.format("31/0%s/%s", cal.get(Calendar.MONTH)+1, cal.get(Calendar.YEAR));
 
-        Entry[] entriesInRange = getEntryManager().FilterByDateInRange(startOfTheMonth, endOfMonth);
-
-        ArrayList<Category> categories = new ArrayList<>();
-
-        for (var entry : entriesInRange) {
-            var category = getCategoryManager().getCategoryById(entry.getCategory());
-            if (!categories.contains(category))
-                categories.add(category);
-        }
-
-        return new EntriesCategories(entriesInRange, categories);
+        return getEntriesCategories(startOfTheMonth, endOfMonth);
     }
 
     public EntriesCategories getMonthYearExpenses(int month, int year) throws ParseException, IOException {
         String startOfTheMonth = String.format("1/%s/%s", month, year);
         String endOfMonth = String.format("31/%s/%s", month, year);
 
-        Entry[] entriesInRange = getEntryManager().FilterByDateInRange(startOfTheMonth, endOfMonth);
+        return getEntriesCategories(startOfTheMonth, endOfMonth);
+    }
+
+    public EntriesCategories getMonthYearExpenses(int monthOrYear) throws ParseException, IOException {
+        if (String.valueOf(monthOrYear).length() <= 2)
+            return getMonthlyExpenses(monthOrYear);
+
+        return getYearlyExpenses(monthOrYear);
+
+    }
+
+    private EntriesCategories getMonthlyExpenses(int month) throws ParseException, IOException {
+        Calendar cal = Calendar.getInstance();
+        String startOfTheMonth = String.format("1/%s/%s", month, cal.get(Calendar.YEAR));
+        String endOfMonth = String.format("31/%s/%s", month, cal.get(Calendar.YEAR));
+
+        return getEntriesCategories(startOfTheMonth, endOfMonth);
+    }
+
+    private EntriesCategories getYearlyExpenses(int year) throws ParseException, IOException {
+        ArrayList<Entry> entries = new ArrayList<>();
+        ArrayList<Category>  categories= new ArrayList<>();
+
+        for (int month = 1; month <= 12; month++) {
+            String startOfTheMonth = String.format("1/%s/%s", month, year);
+            String endOfMonth = String.format("31/%s/%s", month, year);
+
+            var monthsExpenses = getEntriesCategories(startOfTheMonth, endOfMonth);
+            entries.addAll(monthsExpenses.getEntries());
+            categories.addAll(monthsExpenses.getCategories());
+        }
+
+        return new EntriesCategories(entries, categories);
+    }
+
+    private EntriesCategories getEntriesCategories(String startOfTheMonth, String endOfMonth) throws ParseException, IOException {
+        ArrayList<Entry> entriesInRange = new ArrayList<>(Arrays.asList(getEntryManager().FilterByDateInRange(startOfTheMonth, endOfMonth)));
 
         ArrayList<Category> categories = new ArrayList<>();
 
@@ -157,15 +186,15 @@ public class DataBaseManager {
     }
 
     public static class EntriesCategories {
-        private final Entry[] entries;
+        private final ArrayList<Entry> entries;
         private final ArrayList<Category> categories;
 
-        public EntriesCategories(Entry[] entries, ArrayList<Category> categories) {
+        public EntriesCategories(ArrayList<Entry> entries, ArrayList<Category> categories) {
             this.entries = entries;
             this.categories = categories;
         }
 
-        public Entry[] getEntries() {
+        public ArrayList<Entry> getEntries() {
             return entries;
         }
 
@@ -173,5 +202,4 @@ public class DataBaseManager {
             return categories;
         }
     }
-
 }
