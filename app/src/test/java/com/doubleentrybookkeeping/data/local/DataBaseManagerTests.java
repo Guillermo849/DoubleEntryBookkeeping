@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Calendar;
 
 public class DataBaseManagerTests extends TestBase {
 
@@ -47,6 +48,11 @@ public class DataBaseManagerTests extends TestBase {
     @Test
     public void getting_this_months_expenses_is_ok() throws IOException, ParseException {
         // Arrange
+        Calendar cal = Calendar.getInstance();
+        String the12OfThisMonthAndYear = String.format("12/0%s/%s", cal.get(Calendar.MONTH)+1, cal.get(Calendar.YEAR));
+        entryWithBaseCategory.setDate(the12OfThisMonthAndYear);
+        entryWithChildCategory.setDate(the12OfThisMonthAndYear);
+
         testStartUp();
 
         // Act
@@ -57,5 +63,15 @@ public class DataBaseManagerTests extends TestBase {
         assertEquals(2, entriesCategories.getCategories().size());
 
         testCleanUp();
+    }
+
+    @Test
+    public void getting_this_month_expenses_when_non_exist_is_ok() throws IOException, ParseException {
+        // Act
+        var entriesCategories = manager.getThisMonthsExpenses();
+
+        // Assert
+        assertEquals(0, entriesCategories.getEntries().length);
+        assertEquals(0, entriesCategories.getCategories().size());
     }
 }

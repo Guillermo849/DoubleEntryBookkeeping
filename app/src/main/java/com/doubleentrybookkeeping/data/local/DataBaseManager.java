@@ -14,6 +14,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class DataBaseManager {
     private final ICategoryDbManager categoryDbManager;
@@ -121,7 +122,11 @@ public class DataBaseManager {
 
     // Todo: Remove throws ParseException
     public EntriesCategories getThisMonthsExpenses() throws ParseException, IOException {
-        Entry[] entriesInRange = getEntryManager().FilterByDateInRange("1/06/2026", "30/06/2026");
+        Calendar cal = Calendar.getInstance();
+        String startOfTheMonth = String.format("1/0%s/%s", cal.get(Calendar.MONTH)+1, cal.get(Calendar.YEAR));
+        String endOfMonth = String.format("31/0%s/%s", cal.get(Calendar.MONTH)+1, cal.get(Calendar.YEAR));
+
+        Entry[] entriesInRange = getEntryManager().FilterByDateInRange(startOfTheMonth, endOfMonth);
 
         ArrayList<Category> categories = new ArrayList<>();
 
