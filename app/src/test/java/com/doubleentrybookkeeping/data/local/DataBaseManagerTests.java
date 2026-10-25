@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
 
 public class DataBaseManagerTests extends TestBase {
 
@@ -15,9 +16,22 @@ public class DataBaseManagerTests extends TestBase {
     }
 
     @Test
+    public void export_data_bases_format_is_ok() {
+        // Assert
+        String expectedFormat = "id,name,base_category\n\n\n" +
+                "id,category,type,method,amount,date,concept,image\n\n";
+        assertEquals(expectedFormat, manager.getDataBaseExportData());
+    }
+
+    @Test
     public void export_data_bases_to_file_is_ok() throws IOException {
+        // Arrange
         String exportPath = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\ExportedDb.csv";
+
+        // Act
         manager.exportDataBasesTo(exportPath);
+
+        // Assert
         assertTrue(new File(exportPath).exists());
     }
 
@@ -28,5 +42,20 @@ public class DataBaseManagerTests extends TestBase {
         String dBImportPath = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\ExportedDb.csv";
         manager.importDataBaseFrom(categoryImportPath, entriesImportPath, dBImportPath);
         assertTrue(new File(categoryImportPath).exists() && new File(entriesImportPath).exists());
+    }
+
+    @Test
+    public void getting_this_months_expenses_is_ok() throws IOException, ParseException {
+        // Arrange
+        testStartUp();
+
+        // Act
+        var entriesCategories = manager.getThisMonthsExpenses();
+
+        // Assert
+        assertEquals(2, entriesCategories.getEntries().length);
+        assertEquals(2, entriesCategories.getCategories().size());
+
+        testCleanUp();
     }
 }

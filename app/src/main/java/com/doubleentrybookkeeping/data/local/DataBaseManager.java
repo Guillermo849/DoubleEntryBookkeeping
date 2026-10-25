@@ -1,6 +1,8 @@
 package com.doubleentrybookkeeping.data.local;
 
 
+import com.doubleentrybookkeeping.domain.models.Category;
+import com.doubleentrybookkeeping.domain.models.Entry;
 import com.doubleentrybookkeeping.interfaces.data.local.ICategoryDbManager;
 
 import java.io.BufferedReader;
@@ -10,6 +12,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
 
 public class DataBaseManager {
     private final ICategoryDbManager categoryDbManager;
@@ -43,7 +47,7 @@ public class DataBaseManager {
         bw.close();
     }
 
-    private String getDataBaseExportData() {
+    public String getDataBaseExportData() {
         StringBuilder exportDbDataBuilder = new StringBuilder();
 
         getDataFromDb(exportDbDataBuilder, categoryDbManager.getDbPath());
@@ -114,4 +118,38 @@ public class DataBaseManager {
             throw new RuntimeException("Error al importar base de datos", e);
         }
     }
+
+    // Todo: Remove throws ParseException
+    public EntriesCategories getThisMonthsExpenses() throws ParseException, IOException {
+        Entry[] entriesInRange = getEntryManager().FilterByDateInRange("1/06/2026", "30/06/2026");
+
+        ArrayList<Category> categories = new ArrayList<>();
+
+        for (var entry : entriesInRange) {
+            var category = getCategoryManager().getCategoryById(entry.getCategory());
+            if (!categories.contains(category))
+                categories.add(category);
+        }
+
+        return new EntriesCategories(entriesInRange, categories);
+    }
+
+    public static class EntriesCategories {
+        private final Entry[] entries;
+        private final ArrayList<Category> categories;
+
+        public EntriesCategories(Entry[] entries, ArrayList<Category> categories) {
+            this.entries = entries;
+            this.categories = categories;
+        }
+
+        public Entry[] getEntries() {
+            return entries;
+        }
+
+        public ArrayList<Category> getCategories() {
+            return categories;
+        }
+    }
+
 }
