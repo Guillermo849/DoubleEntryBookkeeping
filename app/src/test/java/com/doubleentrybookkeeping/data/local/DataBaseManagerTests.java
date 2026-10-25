@@ -74,4 +74,40 @@ public class DataBaseManagerTests extends TestBase {
         assertEquals(0, entriesCategories.getEntries().length);
         assertEquals(0, entriesCategories.getCategories().size());
     }
+
+    @Test
+    public void get_month_expenses_is_ok() throws IOException, ParseException {
+        // Arrange
+        entryWithBaseCategory.setDate("12/05/2023");
+
+        testStartUp();
+
+        // Act
+        var entriesCategories = manager.getMonthYearExpenses(5, 2023);
+
+        // Assert
+        assertEquals(1, entriesCategories.getEntries().length);
+        assertEquals(1, entriesCategories.getCategories().size());
+
+        testCleanUp();
+    }
+
+    @Test
+    public void get_last_months_expenses_is_ok() throws IOException, ParseException {
+        // Arrange
+        Calendar cal = Calendar.getInstance();
+        String the12OfThisMonthAndYear = String.format("12/%s/%s", cal.get(Calendar.MONTH)-1, cal.get(Calendar.YEAR));
+        entryWithBaseCategory.setDate(the12OfThisMonthAndYear);
+
+        testStartUp();
+
+        // Act
+        var entriesCategories = manager.getMonthYearExpenses(cal.get(Calendar.MONTH)-1, cal.get(Calendar.YEAR));
+
+        // Assert
+        assertEquals(1, entriesCategories.getEntries().length);
+        assertEquals(1, entriesCategories.getCategories().size());
+
+        testCleanUp();
+    }
 }

@@ -139,6 +139,23 @@ public class DataBaseManager {
         return new EntriesCategories(entriesInRange, categories);
     }
 
+    public EntriesCategories getMonthYearExpenses(int month, int year) throws ParseException, IOException {
+        String startOfTheMonth = String.format("1/%s/%s", month, year);
+        String endOfMonth = String.format("31/%s/%s", month, year);
+
+        Entry[] entriesInRange = getEntryManager().FilterByDateInRange(startOfTheMonth, endOfMonth);
+
+        ArrayList<Category> categories = new ArrayList<>();
+
+        for (var entry : entriesInRange) {
+            var category = getCategoryManager().getCategoryById(entry.getCategory());
+            if (!categories.contains(category))
+                categories.add(category);
+        }
+
+        return new EntriesCategories(entriesInRange, categories);
+    }
+
     public static class EntriesCategories {
         private final Entry[] entries;
         private final ArrayList<Category> categories;
