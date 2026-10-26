@@ -127,8 +127,11 @@ public class EntryDBManager implements CategoryDeletedListener {
         }
     }
 
-    public Entry[] FilterByID(int ID) {
-        return getEntriesByFiltrating(entry -> entry.getId() == ID);
+    public Entry FilterByID(int ID) {
+        Entry[] entryArray = getEntriesByFiltrating(entry -> entry.getId() == ID);
+        if (entryArray != null)
+            return entryArray[0];
+        return null;
     }
 
     public Entry[] FilterByCategoryID(int categoryID) {
@@ -147,20 +150,23 @@ public class EntryDBManager implements CategoryDeletedListener {
         return getEntriesByFiltrating(entry -> entry.getDate().equals(date));
     }
 
-    public Entry[] FilterByDateInRange(String startDate, String endDate) throws ParseException {
+    public Entry[] FilterByDateInRange(String startDate, String endDate) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        Date start = sdf.parse(startDate);
-        Date end = sdf.parse(endDate);
+        try {
+            Date start = sdf.parse(startDate);
+            Date end = sdf.parse(endDate);
 
-        return getEntriesByFiltrating(entry -> {
-            Date entryDate = null;
-            try {
-                entryDate = sdf.parse(entry.getDate());
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-            return entryDate.after(start) && entryDate.before(end);
-        });
+            return getEntriesByFiltrating(entry -> {
+                try {
+                    Date entryDate = sdf.parse(entry.getDate());
+                    return entryDate.after(start) && entryDate.before(end);
+                } catch (ParseException ignore) {}
+
+                return false;
+            });
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
     public Entry[] FilterByAmount(float amount) {
@@ -171,6 +177,10 @@ public class EntryDBManager implements CategoryDeletedListener {
         return getEntriesByFiltrating(entry -> entry.getAmount() <= maxAmount && entry.getAmount() >= minAmount);
     }
 
+    public Entry[] FilterByConcept(String concept) {
+        return getEntriesByFiltrating(entry -> entry.getConcept().equals(concept));
+    }
+
     public Entry[] getEntriesByFiltrating(Predicate<Entry> condition) {
         List<Entry> foundEntries = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(getDbPath()))) {
@@ -178,22 +188,24 @@ public class EntryDBManager implements CategoryDeletedListener {
             br.readLine();
 
             while ((line = br.readLine()) != null) {
-                String[] values = line.split(",");
-
-                Entry posibleEntry = toEntry(values);
+                Entry posibleEntry = toEntry(line);
 
                 if (condition.test(posibleEntry)) {
                     foundEntries.add(posibleEntry);
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            return null;
         }
-        return foundEntries.toArray(new Entry[0]);
+        if (!foundEntries.isEmpty())
+            return foundEntries.toArray(new Entry[0]);
+        return null;
     }
 
     // Todo: REMOVE Temporary fix to missing Entry values
-    private Entry toEntry(String[] values) {
+    private Entry toEntry(String line) {
+        String[] values = line.split(",");
+
         return new Entry(
                 Integer.parseInt(values[0]),
                 Integer.parseInt(values[1]),

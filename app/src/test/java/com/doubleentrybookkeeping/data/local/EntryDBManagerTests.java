@@ -3,6 +3,7 @@ package com.doubleentrybookkeeping.data.local;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.doubleentrybookkeeping.domain.models.DbObject;
@@ -185,15 +186,65 @@ public class EntryDBManagerTests extends TestBase{
         assertTrue(lines.stream().anyMatch(line -> line.startsWith("20,")));
     }
 
-    // TODO: Fix Tests
+    //region Filters
     @Test
-    public void return_entry_with_given_category() {
+    public void return_entry_with_given_ID() throws IOException {
+        //Arrange
+        testStartUp();
         // Act
-        var filteredEntries = manager.getEntryManager().FilterByCategoryID(3);
-        Entry entry = new Entry(1, 1, Entry.Type.EXPENSES, Entry.PayMethod.CARD, 15.0f);
+        var filteredEntry = manager.getEntryManager().FilterByID(entryWithBaseCategory.getId());
+
+        // Assert
+        assertEquals(entryWithBaseCategory.getConcept(), filteredEntry.getConcept());
+        testCleanUp();
+    }
+
+    @Test
+    public void return_entries_with_given_category_ID() throws IOException {
+        // Arrange
+        testStartUp();
+
+        // Act
+        var filteredEntries = manager.getEntryManager().FilterByCategoryID(BaseCategory.getCategoryId());
+
         // Assert
         assertEquals(1, filteredEntries.length);
-        assertEquals(entry.getId(), filteredEntries[0].getId());
+        assertEquals(entryWithBaseCategory.getId(), filteredEntries[0].getId());
+        assertEquals(BaseCategory.getCategoryId(), filteredEntries[0].getCategory());
+
+        testCleanUp();
+    }
+
+    @Test
+    public void return_entries_with_given_type() throws IOException {
+        // Arrange
+        testStartUp();
+
+        // Act
+        var filteredEntries = manager.getEntryManager().FilterByType(Entry.Type.REVENUE);
+
+        // Assert
+        assertEquals(1, filteredEntries.length);
+        assertEquals(entryWithBaseCategory.getId(), filteredEntries[0].getId());
+        assertEquals(Entry.Type.REVENUE, filteredEntries[0].getType());
+
+        testCleanUp();
+    }
+
+    @Test
+    public void return_entries_with_given_pay_method() throws IOException {
+        // Arrange
+        testStartUp();
+
+        // Act
+        var filteredEntries = manager.getEntryManager().FilterByPayMethod(Entry.PayMethod.CARD);
+
+        // Assert
+        assertEquals(1, filteredEntries.length);
+        assertEquals(entryWithChildCategory.getId(), filteredEntries[0].getId());
+        assertEquals(Entry.PayMethod.CARD, filteredEntries[0].getPayMethod());
+
+        testCleanUp();
     }
 
     @Test
@@ -204,7 +255,7 @@ public class EntryDBManagerTests extends TestBase{
         // Act
         var filteredEntries = manager.getEntryManager().FilterByDate("14/06/2026");
         // Assert
-        assertEquals(1, filteredEntries.length);
+        assertEquals(2, filteredEntries.length);
         testCleanUp();
     }
 
@@ -222,4 +273,91 @@ public class EntryDBManagerTests extends TestBase{
         testCleanUp();
     }
 
+    @Test
+    public void return_entries_with_given_amount() throws IOException {
+        // Arrange
+        testStartUp();
+
+        // Act
+        var filteredEntries = manager.getEntryManager()
+                .FilterByAmount(15.0f);
+
+        // Assert
+        assertEquals(1, filteredEntries.length);
+        assertEquals(entryWithBaseCategory.getId(), filteredEntries[0].getId());
+        assertEquals(15.0f, filteredEntries[0].getAmount(), 0.001f);
+
+        testCleanUp();
+    }
+
+    @Test
+    public void return_entries_with_amount_in_range() throws IOException {
+        // Arrange
+        testStartUp();
+
+        // Act
+        var filteredEntries = manager.getEntryManager().FilterByAmountInRange(20.0f, 15.0f);
+
+        // Assert
+        assertEquals(2, filteredEntries.length);
+
+        for (Entry entry : filteredEntries) {
+            assertTrue(entry.getAmount() >= 15.0f);
+            assertTrue(entry.getAmount() <= 20.0f);
+        }
+
+        testCleanUp();
+    }
+
+    @Test
+    public void return_entries_with_given_concept() throws IOException {
+        // Arrange
+        testStartUp();
+
+        // Act
+        var filteredEntries = manager.getEntryManager().FilterByConcept("Sabrosura");
+
+        // Assert
+        assertEquals(2, filteredEntries.length);
+
+        for (Entry entry : filteredEntries) {
+            assertEquals("Sabrosura", entry.getConcept());
+        }
+
+        testCleanUp();
+    }
+
+    @Test
+    public void return_entry_with_non_existent_ID_is_OK() throws Exception{
+        try {
+            // Act
+            var filteredEntryNull = manager.getEntryManager().FilterByID(100);
+
+            // Assert
+            assertNull(filteredEntryNull);
+        } catch (Exception e) {
+            throw new Exception("No EXCEPTION should have been thrown. Exception thrown: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void return_entry_with_non_existent_X_is_OK() throws Exception{
+        try {
+            // Act & Assert
+            assertNull(manager.getEntryManager().FilterByID(-1));
+            assertNull(manager.getEntryManager().FilterByCategoryID(-1));
+            assertNull(manager.getEntryManager().FilterByType(null));
+            assertNull(manager.getEntryManager().FilterByPayMethod(null));
+            assertNull(manager.getEntryManager().FilterByDate("a"));
+            assertNull(manager.getEntryManager().FilterByDateInRange("99/99/9999", "99/99/9999"));
+            assertNull(manager.getEntryManager().FilterByAmount(-100));
+            assertNull(manager.getEntryManager().FilterByAmountInRange(-100, -100));
+            assertNull(manager.getEntryManager().FilterByConcept("asd"));
+
+        } catch (Exception e) {
+            throw new Exception("No EXCEPTION should have been thrown. Exception thrown: " + e.getMessage());
+        }
+    }
+
+    //endregion
 }
