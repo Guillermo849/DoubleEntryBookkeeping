@@ -3,6 +3,7 @@ package com.doubleentrybookkeeping.data.local;
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
 import com.doubleentrybookkeeping.domain.models.DbObject;
 import com.doubleentrybookkeeping.domain.models.Entry;
+import com.doubleentrybookkeeping.interfaces.ICategoryDeletedListener;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -13,11 +14,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class EntryDBManager {
+public class EntryDBManager implements ICategoryDeletedListener {
 
     private final File dbFile;
 
@@ -28,7 +28,7 @@ public class EntryDBManager {
         checkDataBaseFileExists();
     }
 
-    public void checkDataBasePathIsEmpty(String pathToDb){
+    public void checkDataBasePathIsEmpty(String pathToDb) {
         if (pathToDb.isEmpty())
             throw new NullPointerException(EnumErrors.DataBase.PATH_EMPTY.message);
     }
@@ -125,27 +125,31 @@ public class EntryDBManager {
         }
     }
 
-    public Entry[] FilterByCategoryID(int categoryID){
+    public Entry[] FilterByID(int ID) {
+        return getEntriesByFiltrating(entry -> entry.getId() == ID);
+    }
+
+    public Entry[] FilterByCategoryID(int categoryID) {
         return getEntriesByFiltrating(entry -> entry.getCategory() == categoryID);
     }
 
-    public Entry[] FilterByType(Entry.Type type){
+    public Entry[] FilterByType(Entry.Type type) {
         return getEntriesByFiltrating(entry -> entry.getType() == type);
     }
 
-    public Entry[] FilterByPayMethod(Entry.PayMethod payMethod){
+    public Entry[] FilterByPayMethod(Entry.PayMethod payMethod) {
         return getEntriesByFiltrating(entry -> entry.getPayMethod() == payMethod);
     }
 
-    public Entry[] FilterByDate(Date date){
+    public Entry[] FilterByDate(String date) {
         return getEntriesByFiltrating(entry -> entry.getDate().equals(date));
     }
 
-    public Entry[] FilterByAmount(float amount){
+    public Entry[] FilterByAmount(float amount) {
         return getEntriesByFiltrating(entry -> entry.getAmount() == amount);
     }
 
-    public Entry[] FilterByAmountInRange(float maxAmount, float minAmount){
+    public Entry[] FilterByAmountInRange(float maxAmount, float minAmount) {
         return getEntriesByFiltrating(entry -> entry.getAmount() <= maxAmount && entry.getAmount() >= minAmount);
     }
 
@@ -155,7 +159,7 @@ public class EntryDBManager {
             String line;
             br.readLine();
 
-            while((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
 
                 Entry posibleEntry = toEntry(values);
@@ -170,6 +174,7 @@ public class EntryDBManager {
         return foundEntries.toArray(new Entry[0]);
     }
 
+    // Todo: REMOVE Temporary fix to missing Entry values
     private Entry toEntry(String[] values) {
         return new Entry(
                 Integer.parseInt(values[0]),
@@ -177,9 +182,20 @@ public class EntryDBManager {
                 Entry.Type.valueOf(values[2]),
                 Entry.PayMethod.valueOf(values[3]),
                 Float.parseFloat(values[4]),
-                new Date(Long.parseLong(values[5])),
-                values[6],
-                values[7]
+                // Change start
+                values.length >= 6 ? values[5] : null,
+                values.length >= 7 ? values[6] : null,
+                values.length >= 8 ? values[7] : null
+                // Change end
         );
+    }
+
+    @Override
+    public void deleted_category(int deletedCategory) {
+        var entriesToModify = FilterByCategoryID(deletedCategory);
+        for (var entry : entriesToModify) {
+            entry.setCategory(0);
+            modifyDbObject(entry);
+        }
     }
 }

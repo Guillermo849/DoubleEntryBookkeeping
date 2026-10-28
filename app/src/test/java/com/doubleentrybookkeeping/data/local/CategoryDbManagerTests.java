@@ -1,5 +1,6 @@
 package com.doubleentrybookkeeping.data.local;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 
 import com.doubleentrybookkeeping.domain.exceptions.EnumErrors;
@@ -14,57 +15,40 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 
-public class CategoryDbManagerTests extends TestBase{
-
-
+public class CategoryDbManagerTests extends TestBase {
 
     public CategoryDbManagerTests() throws FileNotFoundException {
     }
 
+    //region CATEGORY MANAGER CONSTRUCTOR
     @Test
-    public void check_that_CategoryDbManager_extends_from_DataBaseManagerTest() {
-        Assert.assertEquals(pathToCategoryDb, categoryDbManager.getDbPath());
-        Assert.assertTrue(categoryDbManager.categoryDbExists());
+    public void create_new_category_manager_is_ok() {
+        try {
+            // Act
+            var categoryManager = new CategoryDbManager(pathToCategoryDb);
+
+            // Assert
+            Assert.assertTrue(categoryManager.getDbPath().equals(pathToCategoryDb)
+                    || categoryManager.getDbPath().equals(pathToCategoryDb.replace('/', '\\')));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("No exceptions should have been thrown");
+        }
     }
+    //endregion
 
-    @Test
-    public void add_Category_Is_OK() throws IOException {
-        // Act
-        categoryDbManager.addCategory(BaseCategory);
-
-        // Assert
-        var category = categoryDbManager.getCategoryById(BaseCategory.getCategoryId());
-        Assert.assertNotNull(category);
-
-        testCleanUp();
-    }
-
-    @Test
-    public void add_Category_Already_Exists_In_DataBase_Throws_Error() throws IOException{
-        // Arrange
-        categoryDbManager.addCategory(BaseCategory);
-
-        // Act
-        Exception exception = assertThrows(InvalidObjectException.class, () -> categoryDbManager.addCategory(BaseCategory));
-
-        // Assert
-        Assert.assertEquals(EnumErrors.CategoryDbManagerActions.CATEGORY_EXISTS.message, exception.getMessage());
-
-        testCleanUp();
-    }
-
+    //region GET CATEGORY
     @Test
     public void get_category_from_db() throws IOException {
         // Arrange
         testStartUp();
 
         // Act
-        var category = categoryDbManager.getCategoryById(BaseCategory.getCategoryId());
+        var fetchedCategory = manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId());
 
         // Assert
-        Assert.assertEquals(BaseCategory.getCategoryId(), category.getCategoryId());
-        Assert.assertEquals(BaseCategory.getBaseCategoryId(), category.getBaseCategoryId());
-        Assert.assertEquals(BaseCategory.getCategoryName(), category.getCategoryName());
+        Assert.assertEquals(BaseCategory.getCategoryId(), fetchedCategory.getCategoryId());
+        Assert.assertEquals(BaseCategory.getBaseCategoryId(), fetchedCategory.getBaseCategoryId());
+        Assert.assertEquals(BaseCategory.getCategoryName(), fetchedCategory.getCategoryName());
 
         testCleanUp();
     }
@@ -72,10 +56,10 @@ public class CategoryDbManagerTests extends TestBase{
     @Test
     public void get_category_from_db_not_found() throws IOException {
         // Act
-        var category = categoryDbManager.getCategoryById(321);
+        var nonExistentCategory = manager.getCategoryManager().getCategoryById(321);
 
         // Assert
-        Assert.assertNull(category);
+        Assert.assertNull(nonExistentCategory);
     }
 
     @Test
@@ -84,27 +68,57 @@ public class CategoryDbManagerTests extends TestBase{
         addInvalidCategoryToDb(3, "asdf", "Invalid Category");
 
         // Act
-        Exception exception = assertThrows(NumberFormatException.class, () -> categoryDbManager.getCategoryById(2));
+        Exception exception = assertThrows(NumberFormatException.class, () -> manager.getCategoryManager().getCategoryById(2));
 
         // Assert
         Assert.assertEquals(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "base_category", exception.getMessage());
 
         // Test Clean Up
-        categoryDbManager.deleteCategory(3);
+        manager.getCategoryManager().deleteCategory(new Category(3, 0, "Invalid Category"));
+    }
+    //endregion
+
+    //region ADD CATEGORY
+    @Test
+    public void add_Category_Is_OK() throws IOException {
+        // Act
+        manager.getCategoryManager().addCategory(BaseCategory);
+
+        // Assert
+        var category = manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId());
+        Assert.assertNotNull(category);
+
+        testCleanUp();
     }
 
+    @Test
+    public void add_Category_Already_Exists_In_DataBase_Throws_Error() throws IOException{
+        // Arrange
+        manager.getCategoryManager().addCategory(BaseCategory);
+
+        // Act
+        Exception exception = assertThrows(InvalidObjectException.class, () -> manager.getCategoryManager().addCategory(BaseCategory));
+
+        // Assert
+        Assert.assertEquals(EnumErrors.CategoryDbManagerActions.CATEGORY_EXISTS.message, exception.getMessage());
+
+        testCleanUp();
+    }
+    //endregion
+
+    //region MODIFY CATEGORY
     @Test
     public void modify_category_is_ok() throws IOException {
         // Arrange
         testStartUp();
-        var newCategory = new Category(BaseCategory.getCategoryId(), BaseCategory.getCategoryName());
-        newCategory.setCategoryName("NewNameForCategory");
+        var newCategoryValues = new Category(BaseCategory.getCategoryId(), "NewNameForCategory");
 
         // Act
-        categoryDbManager.modifyCategory(newCategory);
+        manager.getCategoryManager().modifyCategory(newCategoryValues);
 
         // Assert
-        var modifiedCategory = categoryDbManager.getCategoryById(BaseCategory.getCategoryId());
+        var modifiedCategory = manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId());
+
         Assert.assertNotEquals(BaseCategory.getCategoryName(), modifiedCategory.getCategoryName());
         Assert.assertEquals(BaseCategory.getCategoryId(), modifiedCategory.getCategoryId());
 
@@ -112,39 +126,98 @@ public class CategoryDbManagerTests extends TestBase{
     }
 
     @Test
+    public void modify_non_existent_category_throws_exception() throws IOException {
+        // Act
+        Exception exception = assertThrows(NullPointerException.class,
+                () -> manager.getCategoryManager().modifyCategory(new Category(999, "DoesNotExist")));
+
+        // Assert
+        Assert.assertEquals(
+                String.format(EnumErrors.DataBase.DB_OBJECT_DOES_NOT_EXIST.message, "Category", "999", "Category"),
+                exception.getMessage());
+    }
+    //endregion
+
+    //region DELETE CATEGORY
+    @Test
     public void delete_category_is_ok() throws IOException {
         // Arrange
         testStartUp();
-        Assert.assertNotNull(categoryDbManager.getCategoryById(BaseCategory.getCategoryId()));
+        Assert.assertNotNull(manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId()));
 
         // Act
-        categoryDbManager.deleteCategory(1);
+        manager.getCategoryManager().deleteCategory(BaseCategory);
 
         // Assert
-        Assert.assertNull(categoryDbManager.getCategoryById(BaseCategory.getCategoryId()));
+        Assert.assertNull(manager.getCategoryManager().getCategoryById(BaseCategory.getCategoryId()));
 
         testCleanUp();
     }
 
     @Test
-    public void delete_base_category_sets_child_categories_base_category_column_to_0() throws IOException {
+    public void delete_invalid_category_is_ok() throws IOException {
         // Arrange
-        testStartUp();
-        Assert.assertEquals(1, categoryDbManager.getCategoryById(ChildCategory.getCategoryId()).getBaseCategoryId());
+        addInvalidCategoryToDb(3, "asdf", "Invalid Category");
 
         // Act
-        categoryDbManager.deleteCategory(BaseCategory.getCategoryId());
+        manager.getCategoryManager().deleteCategory(new Category(3, 0, "Invalid Category"));
 
         // Assert
-        Assert.assertNull(categoryDbManager.getCategoryById(ChildCategory.getCategoryId()));
+        assertNull(manager.getCategoryManager().getCategoryById(3));
+    }
+
+    @Test
+    public void delete_base_category_removes_child_categories_from_database_is_ok() throws IOException {
+        // Arrange
+        testStartUp();
+        Assert.assertEquals(1, manager.getCategoryManager().getCategoryById(ChildCategory.getCategoryId()).getBaseCategoryId());
+
+        // Act
+        manager.getCategoryManager().deleteCategory(BaseCategory);
+
+        // Assert
+        Assert.assertNull(manager.getCategoryManager().getCategoryById(ChildCategory.getCategoryId()));
 
         testCleanUp();
     }
 
+    @Test
+    public void delete_category_modifies_entries_category_to_0_is_ok() throws IOException {
+        // Arrange
+        testStartUp();
+        Assert.assertNotNull(manager.getEntryManager().FilterByCategoryID(ChildCategory.getCategoryId()));
+
+        // Act
+        manager.getCategoryManager().deleteCategory(ChildCategory);
+
+        // Assert
+        var entriesFromDeletedCategory = manager.getEntryManager().FilterByCategoryID(ChildCategory.getCategoryId());
+        Assert.assertEquals(0, entriesFromDeletedCategory.length);
+
+        testCleanUp();
+    }
+
+    @Test
+    public void delete_non_existent_category_is_ok() throws Exception {
+        try {
+            // Act
+            var nonExistentCategory = manager.getCategoryManager().getCategoryById(999999);
+
+            // Assert
+            Assert.assertNull(nonExistentCategory);
+
+        } catch (Exception e) {
+            throw new Exception("No EXCEPTION should have been thrown.");
+        }
+    }
+    //endregion
+
+    //region PRIVATE TEST METHODS
     private void addInvalidCategoryToDb(Object id, Object baseCategoryId, Object name) throws IOException {
-        BufferedWriter bw = new BufferedWriter(new FileWriter(categoryDbManager.getDbPath(), true));
+        BufferedWriter bw = new BufferedWriter(new FileWriter(manager.getCategoryManager().getDbPath(), true));
         bw.write(id + "," + name + "," + baseCategoryId);
         bw.newLine();
         bw.close();
     }
+    //endregion
 }
