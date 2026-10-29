@@ -56,7 +56,7 @@ public class CategoryDbManager implements ICategoryDbManager {
     //region ADD, MODIFY, DELETE
     @Override
     public void addCategory(Category category) throws IOException {
-        if(getCategoryByName(category.getCategoryName()) != null){
+        if(getCategoryById(category.getCategoryId()) != null){
             throw new InvalidObjectException(EnumErrors.CategoryDbManagerActions.CATEGORY_EXISTS.message);
         }
         BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath(), true));
@@ -151,6 +151,26 @@ public class CategoryDbManager implements ICategoryDbManager {
 
     //region GET CATEGORY
     @Override
+    public Category[] getCategories() throws IOException {
+        List<Category> categories = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader((getDbPath())))) {
+            String line;
+            br.readLine();
+            while((line = br.readLine()) != null && !line.isEmpty()){
+                String[] columnValues = line.split(",");
+                Category lineCategory = getCategoryFromLine(columnValues);
+
+                categories.add(lineCategory);
+            }
+            return categories.toArray(new Category[0]);
+        }catch (NumberFormatException ex){
+            throw new NumberFormatException(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "base_category");
+        } catch (IOException ex) {
+            throw new IOException(ex.getMessage());
+        }
+    }
+
+    @Override
     public Category getCategoryById(int id) throws IOException {
         return getCategoryBy(id, null);
     }
@@ -164,16 +184,14 @@ public class CategoryDbManager implements ICategoryDbManager {
         try (BufferedReader br = new BufferedReader(new FileReader((getDbPath())))) {
             String line;
             br.readLine();
-            while((line = br.readLine()) != null){
+            while((line = br.readLine()) != null && !line.isEmpty()){
                 String[] columnValues = line.split(",");
                 Category lineCategory = getCategoryFromLine(columnValues);
 
-                if (lineCategory.getCategoryName().equals(name)){
+                if (lineCategory.getCategoryName().equals(name))
                     return lineCategory;
-                }
-                else if(lineCategory.getCategoryId()== id){
+                else if(lineCategory.getCategoryId()== id)
                     return lineCategory;
-                }
             }
         }catch (NumberFormatException ex){
             throw new NumberFormatException(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "base_category");

@@ -19,4 +19,6 @@ public interface ICategoryDbManager {
     Category getCategoryById(int id) throws IOException;
 
     Category getCategoryByName(String name) throws IOException;
+
+    Category[] getCategories() throws IOException;
 }

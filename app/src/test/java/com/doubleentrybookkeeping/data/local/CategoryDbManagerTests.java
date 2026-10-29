@@ -76,6 +76,21 @@ public class CategoryDbManagerTests extends TestBase {
         // Test Clean Up
         manager.getCategoryManager().deleteCategory(new Category(3, 0, "Invalid Category"));
     }
+
+    @Test
+    public void get_all_categories_is_ok() throws IOException {
+        // Arrange
+        testStartUp();
+
+        // Act
+        var categories = manager.getCategoryManager().getCategories();
+
+        // Assert
+        Assert.assertEquals(2, categories.length);
+
+        testCleanUp();
+    }
+
     //endregion
 
     //region ADD CATEGORY

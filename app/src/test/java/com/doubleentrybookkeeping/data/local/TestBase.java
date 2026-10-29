@@ -3,6 +3,8 @@ package com.doubleentrybookkeeping.data.local;
 import com.doubleentrybookkeeping.domain.models.Category;
 import com.doubleentrybookkeeping.domain.models.Entry;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 
 import java.io.File;
@@ -11,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class TestBase {
+    protected static final String exportPath = "./src/test/java/com/doubleentrybookkeeping/TestResources/ExportedDb.csv";
 
     //region Categories
     protected static final String pathToCategoryDb = "./src/test/java/com/doubleentrybookkeeping/TestResources/CategoryDB.csv";
@@ -26,7 +29,7 @@ public class TestBase {
     protected Entry entryWithChildCategory = new Entry(2, ChildCategory.getCategoryId(), Entry.Type.EXPENSES, Entry.PayMethod.CARD, 20.0f, "14/06/2026", "Sabrosura", "imagen");
     //endregion
 
-    protected final DataBaseManager manager = new DataBaseManager(pathToCategoryDb, pathToEntryDb);
+    protected DataBaseManager manager;
 
     public TestBase() throws FileNotFoundException {
     }
@@ -48,6 +51,16 @@ public class TestBase {
                 throw new IOException(e.getMessage());
             }
         }
+    }
+
+    @Before
+    public void setUp() throws FileNotFoundException {
+        manager = new DataBaseManager(pathToCategoryDb, pathToEntryDb);
+    }
+
+    @After
+    public void tearDown() {
+        manager = null;
     }
 
     protected void testStartUp() throws IOException {
