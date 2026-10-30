@@ -56,9 +56,9 @@ public class CategoryDbManager implements ICategoryDbManager {
     //region ADD, MODIFY, DELETE
     @Override
     public void addCategory(Category category) throws IOException {
-        if(getCategoryById(category.getCategoryId()) != null){
+        if(getCategoryById(category.getCategoryId()) != null)
             throw new InvalidObjectException(EnumErrors.CategoryDbManagerActions.CATEGORY_EXISTS.message);
-        }
+
         BufferedWriter bw = new BufferedWriter(new FileWriter(getDbPath(), true));
         bw.write(toCsvFormat(category));
         bw.newLine();
