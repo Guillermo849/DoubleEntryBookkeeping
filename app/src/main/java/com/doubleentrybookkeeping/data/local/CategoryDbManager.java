@@ -150,38 +150,31 @@ public class CategoryDbManager implements ICategoryDbManager {
     //endregion
 
     //region GET CATEGORY
-    // Todo: refactor
     @Override
     public Category[] getCategories() throws IOException {
-        List<Category> categories = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader((getDbPath())))) {
-            String line;
-            br.readLine();
-            while((line = br.readLine()) != null && !line.isEmpty()){
-                String[] columnValues = line.split(",");
-                Category lineCategory = getCategoryFromLine(columnValues);
-
-                categories.add(lineCategory);
-            }
-            return categories.toArray(new Category[0]);
-        }catch (NumberFormatException ex){
-            throw new NumberFormatException(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "base_category");
-        } catch (IOException ex) {
-            throw new IOException(ex.getMessage());
-        }
+        return getCategoryBy(0, null);
     }
 
     @Override
     public Category getCategoryById(int id) throws IOException {
-        return getCategoryBy(id, null);
+        var category = getCategoryBy(id, null);
+        if (category != null)
+            return category[0];
+        return null;
     }
 
     @Override
     public Category getCategoryByName(String name) throws IOException{
-        return getCategoryBy(0, name);
+        var category = getCategoryBy(0, name);
+        if (category != null)
+            return category[0];
+        return null;
     }
 
-    private Category getCategoryBy(int id, String name) throws IOException{
+    private Category[] getCategoryBy(int id, String name) throws IOException{
+        List<Category> categories = new ArrayList<>();
+        var getAllCategories = (id == 0 && name == null);
+
         try (BufferedReader br = new BufferedReader(new FileReader((getDbPath())))) {
             String line;
             br.readLine();
@@ -190,16 +183,18 @@ public class CategoryDbManager implements ICategoryDbManager {
                 Category lineCategory = getCategoryFromLine(columnValues);
 
                 if (lineCategory.getCategoryName().equals(name))
-                    return lineCategory;
+                    return new Category[] { lineCategory };
                 else if(lineCategory.getCategoryId()== id)
-                    return lineCategory;
+                    return new Category[] { lineCategory };
+                else if (getAllCategories)
+                    categories.add(lineCategory);
             }
         }catch (NumberFormatException ex){
-            throw new NumberFormatException(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "base_category");
+            throw new NumberFormatException(EnumErrors.DataBase.INVALID_COLUMN_VALUE_TYPE.message + "id and/or base_category");
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }
-        return null;
+        return getAllCategories && !categories.isEmpty() ? categories.toArray(new Category[0]) : null;
     }
 
     private static Category getCategoryFromLine(String[] columnValues) {
