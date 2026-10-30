@@ -41,13 +41,11 @@ public class DataBaseManager {
 
     public void exportDataBasesTo(String pathToExportFile) throws IOException {
         File exportFile = new File(pathToExportFile);
-        if (!exportFile.exists()){
+        if (!exportFile.exists())
             exportFile.createNewFile();
-        }
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(pathToExportFile, false));
         bw.write(getDataBaseExportData());
-        bw.newLine();
         bw.close();
     }
 
@@ -67,7 +65,6 @@ public class DataBaseManager {
 
             while ((line = br.readLine()) != null)
                 exportDbDataBuilder.append(line).append("\n");
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -83,10 +80,10 @@ public class DataBaseManager {
         BufferedWriter entriesbw = new BufferedWriter(new FileWriter(pathOfEntriesFile, false));
         String[] importedData = getDataBaseImportData(pathOfImportFile);
         categorybw.write(importedData[0]);
-        categorybw.newLine();
+        //categorybw.newLine();
         categorybw.close();
         entriesbw.write(importedData[1]);
-        entriesbw.newLine();
+        //entriesbw.newLine();
         entriesbw.close();
     }
 

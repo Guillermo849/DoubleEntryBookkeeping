@@ -178,7 +178,7 @@ public class EntryDBManager implements ICategoryDeletedListener {
             String line;
             br.readLine();
 
-            while ((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null && !line.isEmpty()) {
                 String[] values = line.split(",");
 
                 Entry posibleEntry = toEntry(values);

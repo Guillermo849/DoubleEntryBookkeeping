@@ -150,6 +150,7 @@ public class CategoryDbManager implements ICategoryDbManager {
     //endregion
 
     //region GET CATEGORY
+    // Todo: refactor
     @Override
     public Category[] getCategories() throws IOException {
         List<Category> categories = new ArrayList<>();

@@ -17,32 +17,47 @@ public class DataBaseManagerTests extends TestBase {
     }
 
     @Test
-    public void export_data_bases_format_is_ok() {
+    public void export_data_bases_format_is_ok() throws IOException {
+        // Act
+        manager.exportDataBasesTo(exportPath);
+
         // Assert
-        String expectedFormat = "id,name,base_category\n\n\n" +
-                "id,category,type,method,amount,date,concept,image\n\n";
+        String expectedFormat = "id,name,base_category\n\n" +
+                "id,category,type,method,amount,date,concept,image\n";
         assertEquals(expectedFormat, manager.getDataBaseExportData());
     }
 
     @Test
     public void export_data_bases_to_file_is_ok() throws IOException {
         // Arrange
-        String exportPath = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\ExportedDb.csv";
+        testStartUp();
 
         // Act
         manager.exportDataBasesTo(exportPath);
 
         // Assert
         assertTrue(new File(exportPath).exists());
+
+        testCleanUp();
     }
 
     @Test
     public void import_data_base_to_file_is_ok() throws IOException {
-        String categoryImportPath = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\CategoryDB.csv";
-        String entriesImportPath = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\EntriesDB.csv";
-        String dBImportPath = ".\\src\\test\\java\\com\\doubleentrybookkeeping\\TestResources\\ExportedDb.csv";
-        manager.importDataBaseFrom(categoryImportPath, entriesImportPath, dBImportPath);
-        assertTrue(new File(categoryImportPath).exists() && new File(entriesImportPath).exists());
+        // Arrange
+        testStartUp();
+
+        manager.exportDataBasesTo(exportPath);
+        testCleanUp();
+
+        // Act
+        manager.importDataBaseFrom(pathToCategoryDb, pathToEntryDb, exportPath);
+
+        // Assert
+        assertEquals(2, manager.getEntryManager().FilterByDate(entryWithBaseCategory.getDate()).length);
+        assertEquals(2, manager.getCategoryManager().getCategories().length);
+        assertTrue(new File(pathToCategoryDb).exists() && new File(pathToEntryDb).exists());
+
+        testCleanUp();
     }
 
     @Test
